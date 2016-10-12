@@ -1,9 +1,9 @@
 PSR7 和 Zend-mvc 内容验证器
 ===========================
 
-[![Build Status](https://travis-ci.org/zfegg/sms-sender.png)](https://travis-ci.org/zfegg/content-validation)
-[![Coverage Status](https://coveralls.io/repos/github/zfegg/sms-sender/badge.svg?branch=master)](https://coveralls.io/github/zfegg/content-validation?branch=master)
-[![Latest Stable Version](https://poser.pugx.org/zfegg/sms-sender/v/stable.png)](https://packagist.org/packages/zfegg/content-validation)
+[![Build Status](https://travis-ci.org/zfegg/content-validation.png)](https://travis-ci.org/zfegg/content-validation)
+[![Coverage Status](https://coveralls.io/repos/github/zfegg/content-validation/badge.svg?branch=master)](https://coveralls.io/github/zfegg/content-validation?branch=master)
+[![Latest Stable Version](https://poser.pugx.org/zfegg/content-validation/v/stable.png)](https://packagist.org/packages/zfegg/content-validation)
 
 ## 描述
 
