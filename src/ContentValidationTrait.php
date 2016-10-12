@@ -1,7 +1,6 @@
 <?php
 namespace Zfegg\ContentValidation;
 
-
 use Zend\InputFilter\InputFilterPluginManager;
 use Zend\ServiceManager\ServiceManager;
 
@@ -9,8 +8,6 @@ trait ContentValidationTrait
 {
 
     protected $inputFilterManager;
-
-    protected $invalidHandler;
 
     /**
      * @return InputFilterPluginManager
@@ -33,24 +30,4 @@ trait ContentValidationTrait
         $this->inputFilterManager = $inputFilterManager;
         return $this;
     }
-
-    /**
-     *
-     * @return callable
-     */
-    public function getInvalidHandler()
-    {
-        return $this->invalidHandler;
-    }
-
-    /**
-     * @param callable $invalidHandler
-     * @return $this
-     */
-    public function setInvalidHandler(callable $invalidHandler)
-    {
-        $this->invalidHandler = $invalidHandler;
-        return $this;
-    }
-
 }

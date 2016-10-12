@@ -1,19 +1,17 @@
 <?php
 
-namespace Zfegg\MvcListener;
+namespace Zfegg\ContentValidation;
 
 use Zend\EventManager\AbstractListenerAggregate;
 use Zend\EventManager\EventManagerInterface;
 use Zend\Mvc\MvcEvent;
 use Zend\Stdlib\ResponseInterface;
-use Zfegg\ContentValidation\ContentValidationTrait;
-
 
 /**
  * Class ContentValidation
  * @package Zfegg\MvcListener
  */
-class ContentValidation extends AbstractListenerAggregate
+class ContentValidationListener extends AbstractListenerAggregate
 {
     use ContentValidationTrait;
     const EVENT_VALIDATE_PREPARE = 'content-validation.prepare';
@@ -63,17 +61,18 @@ class ContentValidation extends AbstractListenerAggregate
 
         $inputFilter = $inputFilters->get($inputFilterName);
 
-        $e->setParam(self::INPUT_FILTER_NAME, $inputFilterName);
+        $e->setParam(self::INPUT_FILTER_NAME, $inputFilter);
 
         $data = [];
 
         if ($request->isGet()) {
             $data = $request->getQuery();
-        } else if ($request->isPost() || $request->isPut() || $request->isPatch()) {
+        } elseif ($request->isPost() || $request->isPut() || $request->isPatch()) {
             $data = $request->getPost();
         }
 
-        $e->setParam('input_filter_data', $data);;
+        $e->setParam('input_filter_data', $data);
+        ;
 
         $e->setName(self::EVENT_VALIDATE_PREPARE);
         $events = $e->getApplication()->getEventManager();
@@ -85,7 +84,7 @@ class ContentValidation extends AbstractListenerAggregate
         if (is_array($last)) {
             $data = $last;
             $e->setParam('input_filter_data', $data);
-        } else if ($last instanceof ResponseInterface) {
+        } elseif ($last instanceof ResponseInterface) {
             return $last;
         }
 
