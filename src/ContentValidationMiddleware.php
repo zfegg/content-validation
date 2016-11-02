@@ -39,8 +39,8 @@ class ContentValidationMiddleware
     public function __construct(InputFilterPluginManager $inputFilters = null, callable $invalidHandler = null)
     {
         $defaultInvalidHandler = function ($self, $request, ResponseInterface $response, $next) {
-            $response->withStatus(422);
-            $response->withHeader('Content-Type', 'application/json');
+            $response = $response->withStatus(422);
+            $response = $response->withHeader('Content-Type', 'application/json');
             $response->getBody()->write(json_encode([
                 'status' => 422,
                 'detail' => 'Failed Validation',
