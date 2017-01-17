@@ -13,10 +13,32 @@ use Zend\InputFilter\InputFilterPluginManager;
  */
 class ContentValidationMiddleware
 {
-    const INPUT_FILTER_NAME = 'Zfegg\ContentValidation\InputFilter';
     use ContentValidationTrait;
 
+    const INPUT_FILTER_NAME = 'Zfegg\ContentValidation\InputFilter';
+    const INPUT_FILTER = 'input_filter';
+
     protected $inputFilter;
+
+    protected $requestInputFilterKeyName = self::INPUT_FILTER;
+
+    /**
+     * @return string
+     */
+    public function getRequestInputFilterKeyName()
+    {
+        return $this->requestInputFilterKeyName;
+    }
+
+    /**
+     * @param string $requestInputFilterKeyName
+     * @return $this
+     */
+    public function setRequestInputFilterKeyName($requestInputFilterKeyName)
+    {
+        $this->requestInputFilterKeyName = $requestInputFilterKeyName;
+        return $this;
+    }
 
     /**
      * @return InputFilterInterface
@@ -39,8 +61,8 @@ class ContentValidationMiddleware
     public function __construct(InputFilterPluginManager $inputFilters = null, callable $invalidHandler = null)
     {
         $defaultInvalidHandler = function ($self, $request, ResponseInterface $response, $next) {
-            $response->withStatus(422);
-            $response->withHeader('Content-Type', 'application/json');
+            $response = $response->withStatus(422);
+            $response = $response->withHeader('Content-Type', 'application/json');
             $response->getBody()->write(json_encode([
                 'status' => 422,
                 'detail' => 'Failed Validation',
@@ -73,6 +95,7 @@ class ContentValidationMiddleware
         $inputFilter = $inputFilters->get($inputFilterName);
 
         $this->setInputFilter($inputFilter);
+        $request = $request->withAttribute(self::INPUT_FILTER, $inputFilter);
 
         if ($request->getMethod() == 'GET') {
             $data = $request->getQueryParams();
