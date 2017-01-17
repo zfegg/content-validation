@@ -65,7 +65,10 @@ class ContentValidationMiddlewareTest extends \PHPUnit_Framework_TestCase
         $request = $request->withAttribute(ContentValidationMiddleware::INPUT_FILTER_NAME, $inputFilterName);
 
         $this->initInputFilters($middleware->getInputFilterManager());
-        $response = $middleware($request, $response, function ($request, Response $response) {
+        $response = $middleware($request, $response, function (ServerRequestInterface $request, Response $response)
+ use ($middleware) {
+            $inputFilter = $request->getAttribute(ContentValidationMiddleware::INPUT_FILTER);
+            $this->assertEquals($middleware->getInputFilter(), $inputFilter);
             $this->assertInstanceOf(ServerRequestInterface::class, $request);
             $this->assertInstanceOf(ResponseInterface::class, $response);
 
