@@ -10,12 +10,10 @@ use Zend\Diactoros\ServerRequest;
 use Zend\Diactoros\UploadedFile;
 use Zend\InputFilter\Factory;
 use Zend\InputFilter\InputFilterPluginManager;
-use Zend\ServiceManager\ServiceManager;
 use Zfegg\ContentValidation\ContentValidationMiddleware;
 
 class ContentValidationMiddlewareTest extends TestCase
 {
-
     public function invokeProvider()
     {
 
@@ -36,9 +34,7 @@ class ContentValidationMiddlewareTest extends TestCase
 
         $postFileReq = new ServerRequest(
             [],
-            [
-                'file' => $uploaded,
-            ],
+            ['file' => $uploaded,],
             null,
             'POST',
             'php://input',
@@ -51,62 +47,97 @@ class ContentValidationMiddlewareTest extends TestCase
         return [
             'NotFoundInputFilterNameWithAttribute' => [
                 '',
-                new ServerRequest()
+                new ServerRequest(),
             ],
             'NotFoundInputFilterWithInputFilters'  => [
                 'not_found',
-                new ServerRequest()
+                new ServerRequest(),
             ],
             'HttpGetValid'                         => [
                 'test',
                 new ServerRequest(
-                    [], [], null, 'GET', 'php://input', [], [], ['age' => 11]
+                    [],
+                    [],
+                    null,
+                    'GET',
+                    'php://input',
+                    [],
+                    [],
+                    ['age' => 11]
                 ),
-                'success'
+                'success',
             ],
             'HttpGetInvalid'                       => [
                 'test',
                 new ServerRequest(
-                    [], [], null, 'GET', 'php://input', [], [], ['age' => 101]
+                    [],
+                    [],
+                    null,
+                    'GET',
+                    'php://input',
+                    [],
+                    [],
+                    ['age' => 101]
                 ),
                 [
                     'status'              => 422,
                     'detail'              => 'Failed Validation',
-                    'validation_messages' => []
-                ]
+                    'validation_messages' => [],
+                ],
             ],
             'HttpPostValid'                        => [
                 'test',
                 new ServerRequest(
-                    [], [], null, 'POST', 'php://input', [], [], [],
+                    [],
+                    [],
+                    null,
+                    'POST',
+                    'php://input',
+                    [],
+                    [],
+                    [],
                     ['age' => 11]
                 ),
-                'success'
+                'success',
             ],
             'HttpPostInvalid'                      => [
                 'test',
                 new ServerRequest(
-                    [], [], null, 'POST', 'php://input', [], [], [],
+                    [],
+                    [],
+                    null,
+                    'POST',
+                    'php://input',
+                    [],
+                    [],
+                    [],
                     ['age' => 101]
                 ),
                 [
                     'status'              => 422,
                     'detail'              => 'Failed Validation',
-                    'validation_messages' => []
-                ]
+                    'validation_messages' => [],
+                ],
             ],
             'IgnoreWithCustomMethod'               => [
                 'test',
                 new ServerRequest(
-                    [], [], null, 'CUSTOM', 'php://input', [], [], [],
+                    [],
+                    [],
+                    null,
+                    'CUSTOM',
+                    'php://input',
+                    [],
+                    [],
+                    [],
                     ['age' => 101]
                 ),
-                'success'
+                'success',
             ],
-            'PostFiles' => [
+            'PostFiles'                            => [
                 'post.file',
                 $postFileReq,
-                'success'
+                'success',
             ],
         ];
     }
@@ -129,22 +160,30 @@ class ContentValidationMiddlewareTest extends TestCase
         $middleware = new ContentValidationMiddleware();
 
         $request = $request->withAttribute(
-            ContentValidationMiddleware::INPUT_FILTER_NAME, $inputFilterName
+            ContentValidationMiddleware::INPUT_FILTER_NAME,
+            $inputFilterName
         );
 
         $this->initInputFilters($middleware->getInputFilterManager());
         $response = $middleware(
-            $request, $response,
-            function (ServerRequestInterface $request, Response $response)
- use ($middleware) {
+            $request,
+            $response,
+            function (
+                ServerRequestInterface $request,
+                Response $response
+            ) use (
+                $middleware
+            ) {
                 $inputFilter = $request->getAttribute(
                     ContentValidationMiddleware::INPUT_FILTER
                 );
                 $this->assertEquals(
-                    $middleware->getInputFilter(), $inputFilter
+                    $middleware->getInputFilter(),
+                    $inputFilter
                 );
                 $this->assertInstanceOf(
-                    ServerRequestInterface::class, $request
+                    ServerRequestInterface::class,
+                    $request
                 );
                 $this->assertInstanceOf(ResponseInterface::class, $response);
 
@@ -159,7 +198,8 @@ class ContentValidationMiddlewareTest extends TestCase
         if ($responseBody) {
             if (is_string($responseBody)) {
                 $this->assertEquals(
-                    $responseBody, (string)$response->getBody()
+                    $responseBody,
+                    (string)$response->getBody()
                 );
             } elseif (is_array($responseBody)) {
 //                echo (string)$response->getBody(), "\n";
@@ -171,9 +211,9 @@ class ContentValidationMiddlewareTest extends TestCase
         }
     }
 
-    public static function initInputFilters(InputFilterPluginManager $inputFilterPluginManager
-    )
-    {
+    public static function initInputFilters(
+        InputFilterPluginManager $inputFilterPluginManager
+    ) {
         $inputFilterPluginManager->configure(
             [
                 'factories' => [
@@ -188,10 +228,10 @@ class ContentValidationMiddlewareTest extends TestCase
                                     'validators' => [
                                         [
                                             'name'    => 'LessThan',
-                                            'options' => ['max' => 100]
-                                        ]
-                                    ]
-                                ]
+                                            'options' => ['max' => 100],
+                                        ],
+                                    ],
+                                ],
                             ]
                         );
                     },
@@ -203,17 +243,17 @@ class ContentValidationMiddlewareTest extends TestCase
                                     'validators' => [
                                         [
                                             'name'    => 'FileExtension',
-                                            'options' => ['extension' => 'jpg']
-                                        ]
-                                    ]
-                                ]
+                                            'options' => ['extension' => 'jpg'],
+                                        ],
+                                    ],
+                                ],
                             ]
                         );
                     },
                 ],
                 'aliases'   => [
                     'test::test' => 'test',
-                ]
+                ],
             ]
         );
     }
