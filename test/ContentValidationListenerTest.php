@@ -2,17 +2,90 @@
 namespace ZfeggTest\ContentValidation;
 
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerInterface;
 use Zend\EventManager\EventManager;
 use Zend\Http\PhpEnvironment\Request;
 use Zend\Http\PhpEnvironment\Response;
+use Zend\InputFilter\Factory;
+use Zend\InputFilter\InputFilterPluginManager;
+use Zend\InputFilter\InputFilterPluginManagerFactory;
 use Zend\Mvc\ApplicationInterface;
 use Zend\Mvc\MvcEvent;
 use Zend\Router\Http\RouteMatch;
+use Zend\ServiceManager\Factory\InvokableFactory;
+use Zend\ServiceManager\ServiceManager;
 use Zend\Stdlib\Parameters;
 use Zfegg\ContentValidation\ContentValidationListener;
+use Zfegg\ContentValidation\ContentValidationListenerFactory;
 
 class ContentValidationListenerTest extends TestCase
 {
+    /**
+     * @var ContainerInterface
+     */
+    private $container;
+
+
+    public function setUp()
+    {
+        $sl = new ServiceManager();
+        $sl->configure([
+            'factories' => [
+                InputFilterPluginManager::class => InputFilterPluginManagerFactory::class,
+                ContentValidationListener::class => ContentValidationListenerFactory::class,
+            ],
+            'aliases' => [
+                'InputFilterManager' => InputFilterPluginManager::class
+            ]
+        ]);
+        $inputFilterPluginManager = $sl->get(InputFilterPluginManager::class);
+        $inputFilterPluginManager->configure(
+            [
+                'factories' => [
+                    'test'      => function () {
+                        return (new Factory())->createInputFilter(
+                            [
+                                [
+                                    'name'       => 'age',
+                                    'filters'    => [
+                                        ['name' => 'ToInt'],
+                                    ],
+                                    'validators' => [
+                                        [
+                                            'name'    => 'LessThan',
+                                            'options' => ['max' => 100],
+                                        ],
+                                    ],
+                                ],
+                            ]
+                        );
+                    },
+                    'post.file' => function () {
+                        return (new Factory())->createInputFilter(
+                            [
+                                [
+                                    'name'       => 'file',
+                                    'validators' => [
+                                        [
+                                            'name'    => 'FileExtension',
+                                            'options' => ['extension' => 'jpg'],
+                                        ],
+                                    ],
+                                ],
+                            ]
+                        );
+                    },
+                ],
+                'aliases'   => [
+                    'test::test' => 'test',
+                ],
+            ]
+        );
+
+        $this->container = $sl;
+
+    }
+
     public function invokeProvider()
     {
         return [
@@ -72,9 +145,9 @@ class ContentValidationListenerTest extends TestCase
         $event->setRouteMatch($routeMatch);
         $event->setApplication($mockApplication);
 
-        $listener = new ContentValidationListener();
+        /** @var ContentValidationListener $listener */
+        $listener = $this->container->get(ContentValidationListener::class);
         $listener->attach($events);
-        ContentValidationMiddlewareTest::initInputFilters($listener->getInputFilterManager());
 
         $this->attachPreValidation($events, $prepareReturnData);
 
