@@ -1,6 +1,7 @@
 <?php
 namespace ZfeggTest\ContentValidation;
 
+use PHPUnit\Framework\TestCase;
 use Zend\EventManager\EventManager;
 use Zend\Http\PhpEnvironment\Request;
 use Zend\Http\PhpEnvironment\Response;
@@ -10,7 +11,7 @@ use Zend\Router\Http\RouteMatch;
 use Zend\Stdlib\Parameters;
 use Zfegg\ContentValidation\ContentValidationListener;
 
-class ContentValidationListenerTest extends \PHPUnit_Framework_TestCase
+class ContentValidationListenerTest extends TestCase
 {
     public function invokeProvider()
     {

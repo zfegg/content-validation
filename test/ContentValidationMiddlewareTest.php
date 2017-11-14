@@ -1,52 +1,111 @@
 <?php
+
 namespace ZfeggTest\ContentValidation;
 
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\ServerRequest;
+use Zend\Diactoros\UploadedFile;
 use Zend\InputFilter\Factory;
 use Zend\InputFilter\InputFilterPluginManager;
 use Zend\ServiceManager\ServiceManager;
 use Zfegg\ContentValidation\ContentValidationMiddleware;
 
-class ContentValidationMiddlewareTest extends \PHPUnit_Framework_TestCase
+class ContentValidationMiddlewareTest extends TestCase
 {
 
     public function invokeProvider()
     {
+
+        $file = [
+            'name'     => 'DM4C2738.jpg',
+            'type'     => 'image/jpeg',
+            'tmp_name' => tmpfile(),
+            'error'    => 0,
+            'size'     => 1031601,
+        ];
+        $uploaded = new UploadedFile(
+            $file['tmp_name'],
+            $file['size'],
+            $file['error'],
+            $file['name'],
+            $file['type']
+        );
+
+        $postFileReq = new ServerRequest(
+            [],
+            [
+                'file' => $uploaded,
+            ],
+            null,
+            'POST',
+            'php://input',
+            [],
+            [],
+            [],
+            ['age' => 101]
+        );
+
         return [
             'NotFoundInputFilterNameWithAttribute' => [
                 '',
                 new ServerRequest()
             ],
-            'NotFoundInputFilterWithInputFilters' => [
+            'NotFoundInputFilterWithInputFilters'  => [
                 'not_found',
                 new ServerRequest()
             ],
-            'HttpGetValid' => [
+            'HttpGetValid'                         => [
                 'test',
-                new ServerRequest([], [], null, 'GET', 'php://input', [], [], ['age' => 11]),
+                new ServerRequest(
+                    [], [], null, 'GET', 'php://input', [], [], ['age' => 11]
+                ),
                 'success'
             ],
-            'HttpGetInvalid' => [
+            'HttpGetInvalid'                       => [
                 'test',
-                new ServerRequest([], [], null, 'GET', 'php://input', [], [], ['age' => 101]),
-                ['status' => 422, 'detail' => 'Failed Validation', 'validation_messages' => []]
+                new ServerRequest(
+                    [], [], null, 'GET', 'php://input', [], [], ['age' => 101]
+                ),
+                [
+                    'status'              => 422,
+                    'detail'              => 'Failed Validation',
+                    'validation_messages' => []
+                ]
             ],
-            'HttpPostValid' => [
+            'HttpPostValid'                        => [
                 'test',
-                new ServerRequest([], [], null, 'POST', 'php://input', [], [], [], ['age' => 11]),
+                new ServerRequest(
+                    [], [], null, 'POST', 'php://input', [], [], [],
+                    ['age' => 11]
+                ),
                 'success'
             ],
-            'HttpPostInvalid' => [
+            'HttpPostInvalid'                      => [
                 'test',
-                new ServerRequest([], [], null, 'POST', 'php://input', [], [], [], ['age' => 101]),
-                ['status' => 422, 'detail' => 'Failed Validation', 'validation_messages' => []]
+                new ServerRequest(
+                    [], [], null, 'POST', 'php://input', [], [], [],
+                    ['age' => 101]
+                ),
+                [
+                    'status'              => 422,
+                    'detail'              => 'Failed Validation',
+                    'validation_messages' => []
+                ]
             ],
-            'IgnoreWithCustomMethod' => [
+            'IgnoreWithCustomMethod'               => [
                 'test',
-                new ServerRequest([], [], null, 'CUSTOM', 'php://input', [], [], [], ['age' => 101]),
+                new ServerRequest(
+                    [], [], null, 'CUSTOM', 'php://input', [], [], [],
+                    ['age' => 101]
+                ),
+                'success'
+            ],
+            'PostFiles' => [
+                'post.file',
+                $postFileReq,
                 'success'
             ],
         ];
@@ -55,65 +114,107 @@ class ContentValidationMiddlewareTest extends \PHPUnit_Framework_TestCase
     /**
      *
      * @dataProvider invokeProvider
+     *
+     * @param               $inputFilterName
+     * @param ServerRequest $request
+     * @param null          $responseBody
      */
-    public function testInvoke($inputFilterName, ServerRequest $request, $responseBody = null)
-    {
+    public function testInvoke(
+        $inputFilterName,
+        ServerRequest $request,
+        $responseBody = null
+    ) {
 
         $response = new Response();
         $middleware = new ContentValidationMiddleware();
 
-        $request = $request->withAttribute(ContentValidationMiddleware::INPUT_FILTER_NAME, $inputFilterName);
+        $request = $request->withAttribute(
+            ContentValidationMiddleware::INPUT_FILTER_NAME, $inputFilterName
+        );
 
         $this->initInputFilters($middleware->getInputFilterManager());
-        $response = $middleware($request, $response, function (ServerRequestInterface $request, Response $response)
+        $response = $middleware(
+            $request, $response,
+            function (ServerRequestInterface $request, Response $response)
  use ($middleware) {
-            $inputFilter = $request->getAttribute(ContentValidationMiddleware::INPUT_FILTER);
-            $this->assertEquals($middleware->getInputFilter(), $inputFilter);
-            $this->assertInstanceOf(ServerRequestInterface::class, $request);
-            $this->assertInstanceOf(ResponseInterface::class, $response);
+                $inputFilter = $request->getAttribute(
+                    ContentValidationMiddleware::INPUT_FILTER
+                );
+                $this->assertEquals(
+                    $middleware->getInputFilter(), $inputFilter
+                );
+                $this->assertInstanceOf(
+                    ServerRequestInterface::class, $request
+                );
+                $this->assertInstanceOf(ResponseInterface::class, $response);
 
-            $response->getBody()->write('success');
-            return $response;
-        });
+                $response->getBody()->write('success');
+
+                return $response;
+            }
+        );
 
         $this->assertInstanceOf(ResponseInterface::class, $response);
 
         if ($responseBody) {
             if (is_string($responseBody)) {
-                $this->assertEquals($responseBody, (string)$response->getBody());
+                $this->assertEquals(
+                    $responseBody, (string)$response->getBody()
+                );
             } elseif (is_array($responseBody)) {
 //                echo (string)$response->getBody(), "\n";
-                $this->assertArraySubset($responseBody, json_decode((string)$response->getBody(), true));
+                $this->assertArraySubset(
+                    $responseBody,
+                    json_decode((string)$response->getBody(), true)
+                );
             }
         }
     }
 
-    public function testConstructSetInputFilters()
+    public static function initInputFilters(InputFilterPluginManager $inputFilterPluginManager
+    )
     {
-        new ContentValidationMiddleware(new InputFilterPluginManager(new ServiceManager()));
-    }
-
-    public static function initInputFilters(InputFilterPluginManager $inputFilterPluginManager)
-    {
-        $inputFilterPluginManager->configure([
-            'factories' => [
-                'test' => function () {
-                    return (new Factory())->createInputFilter([
-                        [
-                            'name' => 'age',
-                            'filters' => [
-                                ['name' => 'ToInt'],
-                            ],
-                            'validators' => [
-                                ['name' => 'LessThan', 'options' => ['max' => 100]]
+        $inputFilterPluginManager->configure(
+            [
+                'factories' => [
+                    'test'      => function () {
+                        return (new Factory())->createInputFilter(
+                            [
+                                [
+                                    'name'       => 'age',
+                                    'filters'    => [
+                                        ['name' => 'ToInt'],
+                                    ],
+                                    'validators' => [
+                                        [
+                                            'name'    => 'LessThan',
+                                            'options' => ['max' => 100]
+                                        ]
+                                    ]
+                                ]
                             ]
-                        ]
-                    ]);
-                }
-            ],
-            'aliases' => [
-                'test::test' => 'test',
+                        );
+                    },
+                    'post.file' => function () {
+                        return (new Factory())->createInputFilter(
+                            [
+                                [
+                                    'name'       => 'file',
+                                    'validators' => [
+                                        [
+                                            'name'    => 'FileExtension',
+                                            'options' => ['extension' => 'jpg']
+                                        ]
+                                    ]
+                                ]
+                            ]
+                        );
+                    },
+                ],
+                'aliases'   => [
+                    'test::test' => 'test',
+                ]
             ]
-        ]);
+        );
     }
 }

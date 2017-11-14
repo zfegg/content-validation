@@ -4,11 +4,13 @@ namespace Zfegg\ContentValidation;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\UploadedFileInterface;
 use Zend\InputFilter\InputFilterInterface;
 use Zend\InputFilter\InputFilterPluginManager;
 
 /**
  * Class ContentValidation
+ *
  * @package Zfegg\Psr7Middleware
  */
 class ContentValidationMiddleware
@@ -32,11 +34,13 @@ class ContentValidationMiddleware
 
     /**
      * @param string $requestInputFilterKeyName
+     *
      * @return $this
      */
     public function setRequestInputFilterKeyName($requestInputFilterKeyName)
     {
         $this->requestInputFilterKeyName = $requestInputFilterKeyName;
+
         return $this;
     }
 
@@ -50,27 +54,38 @@ class ContentValidationMiddleware
 
     /**
      * @param InputFilterInterface $inputFilter
+     *
      * @return $this
      */
     public function setInputFilter(InputFilterInterface $inputFilter)
     {
         $this->inputFilter = $inputFilter;
+
         return $this;
     }
 
-    public function __construct(InputFilterPluginManager $inputFilters = null, callable $invalidHandler = null)
-    {
-        $defaultInvalidHandler = function ($self, $request, ResponseInterface $response, $next) {
-            $response = $response->withStatus(422);
-            $response = $response->withHeader('Content-Type', 'application/json');
-            $response->getBody()->write(json_encode([
-                'status' => 422,
-                'detail' => 'Failed Validation',
-                'validation_messages' => $this->getInputFilter()->getMessages()
-            ]));
+    public function __construct(
+        InputFilterPluginManager $inputFilters = null,
+        callable $invalidHandler = null
+    ) {
+        $defaultInvalidHandler =
+            function ($self, $request, ResponseInterface $response, $next) {
+                $response = $response->withStatus(422);
+                $response =
+                    $response->withHeader('Content-Type', 'application/json');
+                $response->getBody()->write(
+                    json_encode(
+                        [
+                            'status'              => 422,
+                            'detail'              => 'Failed Validation',
+                            'validation_messages' => $this->getInputFilter()
+                                ->getMessages()
+                        ]
+                    )
+                );
 
-            return $response;
-        };
+                return $response;
+            };
 
         $this->setInvalidHandler($invalidHandler ?: $defaultInvalidHandler);
 
@@ -79,16 +94,19 @@ class ContentValidationMiddleware
         }
     }
 
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next)
-    {
+    public function __invoke(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        callable $next
+    ) {
         $inputFilterName = $request->getAttribute(self::INPUT_FILTER_NAME);
 
-        if (!$inputFilterName) {
+        if (! $inputFilterName) {
             return $next($request, $response);
         }
 
         $inputFilters = $this->getInputFilterManager();
-        if (!$inputFilters->has($inputFilterName)) {
+        if (! $inputFilters->has($inputFilterName)) {
             return $next($request, $response);
         }
 
@@ -105,14 +123,53 @@ class ContentValidationMiddleware
             return $next($request, $response);
         }
 
-        $inputFilter->setData($data);
+        /** @var UploadedFileInterface[] $files */
+        $files = $request->getUploadedFiles();
+        if (0 < count($files)) {
+            // File uploads are not validated for collections; impossible to
+            // match file fields to discrete sets
+            $files = self::psr2ArrayFiles($files);
+            $data = array_merge($data, $files);
+        }
 
-        if (!$inputFilter->isValid()) {
+        $inputFilter->setData((array)$data);
+
+        if (! $inputFilter->isValid()) {
             $invalidHandler = $this->getInvalidHandler();
+
             return $invalidHandler($this, $request, $response, $next);
         }
 
         return $next($request, $response);
+    }
+
+
+    /**
+     * PSR Request UploadedFileInterface to `$_FILES` format
+     *
+     * @param array|UploadedFileInterface[] $psrFiles
+     *
+     * @return array
+     */
+    public static function psr2ArrayFiles(array $psrFiles)
+    {
+        $files = [];
+
+        foreach ($psrFiles as $name => $file) {
+            if ($file instanceof UploadedFileInterface) {
+                $files[$name] = [
+                    'name' => $file->getClientFilename(),
+                    'type' => $file->getClientMediaType(),
+                    'tmp_name' => $file->getStream()->getMetadata('uri'),
+                    'error' => $file->getError(),
+                    'size' => $file->getSize()
+                ];
+            } elseif (is_array($file)) {
+                $files[$name] = self::psr2ArrayFiles($file);
+            }
+        }
+
+        return $files;
     }
 
     protected $invalidHandler;
@@ -128,11 +185,13 @@ class ContentValidationMiddleware
 
     /**
      * @param callable $invalidHandler
+     *
      * @return $this
      */
     public function setInvalidHandler(callable $invalidHandler)
     {
         $this->invalidHandler = $invalidHandler;
+
         return $this;
     }
 }
