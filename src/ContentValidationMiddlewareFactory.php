@@ -3,7 +3,6 @@
 
 namespace Zfegg\ContentValidation;
 
-
 use Psr\Container\ContainerInterface;
 use Zend\InputFilter\InputFilterPluginManager;
 

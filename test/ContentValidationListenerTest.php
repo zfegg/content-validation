@@ -12,7 +12,6 @@ use Zend\InputFilter\InputFilterPluginManagerFactory;
 use Zend\Mvc\ApplicationInterface;
 use Zend\Mvc\MvcEvent;
 use Zend\Router\Http\RouteMatch;
-use Zend\ServiceManager\Factory\InvokableFactory;
 use Zend\ServiceManager\ServiceManager;
 use Zend\Stdlib\Parameters;
 use Zfegg\ContentValidation\ContentValidationListener;
@@ -83,7 +82,6 @@ class ContentValidationListenerTest extends TestCase
         );
 
         $this->container = $sl;
-
     }
 
     public function invokeProvider()

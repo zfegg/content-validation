@@ -12,7 +12,6 @@ use Zend\Diactoros\UploadedFile;
 use Zend\InputFilter\Factory;
 use Zend\InputFilter\InputFilterPluginManager;
 use Zend\InputFilter\InputFilterPluginManagerFactory;
-use Zend\ServiceManager\Factory\InvokableFactory;
 use Zend\ServiceManager\ServiceManager;
 use Zfegg\ContentValidation\ContentValidationMiddleware;
 use Zfegg\ContentValidation\ContentValidationMiddlewareFactory;
@@ -79,7 +78,6 @@ class ContentValidationMiddlewareTest extends TestCase
         );
 
         $this->container = $sl;
-
     }
 
     public function invokeProvider()
@@ -278,5 +276,4 @@ class ContentValidationMiddlewareTest extends TestCase
             }
         }
     }
-
 }
