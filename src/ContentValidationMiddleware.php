@@ -5,6 +5,8 @@ namespace Zfegg\ContentValidation;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UploadedFileInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use Zend\InputFilter\InputFilterInterface;
 use Zend\InputFilter\InputFilterPluginManager;
 
@@ -13,7 +15,7 @@ use Zend\InputFilter\InputFilterPluginManager;
  *
  * @package Zfegg\Psr7Middleware
  */
-class ContentValidationMiddleware
+class ContentValidationMiddleware implements MiddlewareInterface
 {
     use ContentValidationTrait;
 
@@ -21,28 +23,7 @@ class ContentValidationMiddleware
     const INPUT_FILTER = 'input_filter';
 
     protected $inputFilter;
-
-    protected $requestInputFilterKeyName = self::INPUT_FILTER;
-
-    /**
-     * @return string
-     */
-    public function getRequestInputFilterKeyName()
-    {
-        return $this->requestInputFilterKeyName;
-    }
-
-    /**
-     * @param string $requestInputFilterKeyName
-     *
-     * @return $this
-     */
-    public function setRequestInputFilterKeyName($requestInputFilterKeyName)
-    {
-        $this->requestInputFilterKeyName = $requestInputFilterKeyName;
-
-        return $this;
-    }
+    protected $response;
 
     /**
      * @return InputFilterInterface
@@ -66,48 +47,41 @@ class ContentValidationMiddleware
 
     public function __construct(
         InputFilterPluginManager $inputFilters = null,
-        callable $invalidHandler = null
+        callable $invalidHandler = null,
+        ResponseInterface $response = null
     ) {
-        $defaultInvalidHandler =
-            function ($self, $request, ResponseInterface $response, $next) {
-                $response = $response->withStatus(422);
-                $response =
-                    $response->withHeader('Content-Type', 'application/json');
-                $response->getBody()->write(
-                    json_encode(
-                        [
-                            'status'              => 422,
-                            'detail'              => 'Failed Validation',
-                            'validation_messages' => $this->getInputFilter()
-                                ->getMessages()
-                        ]
-                    )
-                );
+        $this->response = $response;
 
-                return $response;
-            };
-
-        $this->setInvalidHandler($invalidHandler ?: $defaultInvalidHandler);
+        $this->setInvalidHandler(
+            $invalidHandler ?: $this->getDefaultInvalidHandler()
+        );
 
         if ($inputFilters) {
             $this->setInputFilterManager($inputFilters);
         }
     }
 
-    public function __invoke(
+    /**
+     * @param ResponseInterface $response
+     */
+    public function setResponse(ResponseInterface $response)
+    {
+        $this->response = $response;
+    }
+
+    public function process(
         ServerRequestInterface $request,
-        ResponseInterface $response,
-        callable $next
-    ) {
+        RequestHandlerInterface $handler
+    ): ResponseInterface {
         $inputFilterName = $request->getAttribute(self::INPUT_FILTER_NAME);
 
         if (! $inputFilterName) {
-            return $next($request, $response);
+            return $handler->handle($request);
         }
 
         $inputFilters = $this->getInputFilterManager();
         if (! $inputFilters->has($inputFilterName)) {
-            return $next($request, $response);
+            return $handler->handle($request);
         }
 
         $inputFilter = $inputFilters->get($inputFilterName);
@@ -120,7 +94,7 @@ class ContentValidationMiddleware
         } elseif (in_array($request->getMethod(), ['POST', 'PUT', 'PATCH'])) {
             $data = $request->getParsedBody();
         } else {
-            return $next($request, $response);
+            return $handler->handle($request);
         }
 
         /** @var UploadedFileInterface[] $files */
@@ -137,10 +111,10 @@ class ContentValidationMiddleware
         if (! $inputFilter->isValid()) {
             $invalidHandler = $this->getInvalidHandler();
 
-            return $invalidHandler($this, $request, $response, $next);
+            return $invalidHandler($this, $request, $handler, $this->response);
         }
 
-        return $next($request, $response);
+        return $handler->handle($request);
     }
 
 
@@ -158,11 +132,11 @@ class ContentValidationMiddleware
         foreach ($psrFiles as $name => $file) {
             if ($file instanceof UploadedFileInterface) {
                 $files[$name] = [
-                    'name' => $file->getClientFilename(),
-                    'type' => $file->getClientMediaType(),
+                    'name'     => $file->getClientFilename(),
+                    'type'     => $file->getClientMediaType(),
                     'tmp_name' => $file->getStream()->getMetadata('uri'),
-                    'error' => $file->getError(),
-                    'size' => $file->getSize()
+                    'error'    => $file->getError(),
+                    'size'     => $file->getSize(),
                 ];
             } elseif (is_array($file)) {
                 $files[$name] = self::psr2ArrayFiles($file);
@@ -193,5 +167,41 @@ class ContentValidationMiddleware
         $this->invalidHandler = $invalidHandler;
 
         return $this;
+    }
+
+    public function getDefaultInvalidHandler()
+    {
+        return function (
+            $self,
+            $request,
+            RequestHandlerInterface $handler,
+            ResponseInterface $response = null
+        ) {
+            if (! $response) {
+                throw new Exception\InvalidRequestException(
+                    'Failed Validation.',
+                    422,
+                    $this->getInputFilter()
+                );
+            }
+
+            $response = $response->withStatus(422);
+            $response = $response->withHeader(
+                'Content-Type',
+                'application/json'
+            );
+            $response->getBody()->write(
+                json_encode(
+                    [
+                        'status'              => 422,
+                        'detail'              => 'Failed Validation',
+                        'validation_messages' => $this->getInputFilter()
+                            ->getMessages(),
+                    ]
+                )
+            );
+
+            return $response;
+        };
     }
 }

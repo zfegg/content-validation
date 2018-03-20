@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\ServerRequest;
 use Zend\Diactoros\UploadedFile;
@@ -215,6 +216,9 @@ class ContentValidationMiddlewareTest extends TestCase
      * @param               $inputFilterName
      * @param ServerRequest $request
      * @param null          $responseBody
+     *
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     public function testInvoke(
         $inputFilterName,
@@ -225,37 +229,45 @@ class ContentValidationMiddlewareTest extends TestCase
         $response = new Response();
 
         $middleware = $this->container->get(ContentValidationMiddleware::class);
-
+        $middleware->setResponse($response);
         $request = $request->withAttribute(
             ContentValidationMiddleware::INPUT_FILTER_NAME,
             $inputFilterName
         );
 
-        $response = $middleware(
+        $response = $middleware->process(
             $request,
-            $response,
-            function (
-                ServerRequestInterface $request,
-                Response $response
-            ) use (
-                $middleware
-            ) {
-                $inputFilter = $request->getAttribute(
-                    ContentValidationMiddleware::INPUT_FILTER
-                );
-                $this->assertEquals(
-                    $middleware->getInputFilter(),
-                    $inputFilter
-                );
-                $this->assertInstanceOf(
-                    ServerRequestInterface::class,
-                    $request
-                );
-                $this->assertInstanceOf(ResponseInterface::class, $response);
+            new class($this, $middleware) implements RequestHandlerInterface
+            {
+                protected $middleware;
+                protected $parent;
 
-                $response->getBody()->write('success');
+                public function __construct($self, $middleware)
+                {
+                    $this->middleware = $middleware;
+                    $this->parent = $self;
+                }
 
-                return $response;
+                public function handle(ServerRequestInterface $request): ResponseInterface
+                {
+
+                    $inputFilter = $request->getAttribute(
+                        ContentValidationMiddleware::INPUT_FILTER
+                    );
+                    $this->parent->assertEquals(
+                        $this->middleware->getInputFilter(),
+                        $inputFilter
+                    );
+
+                    $this->parent->assertInstanceOf(
+                        ServerRequestInterface::class,
+                        $request
+                    );
+                    $response = new Response();
+                    $response->getBody()->write('success');
+
+                    return $response;
+                }
             }
         );
 
