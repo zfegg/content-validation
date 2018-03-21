@@ -23,7 +23,7 @@ class ContentValidationMiddleware implements MiddlewareInterface
     const INPUT_FILTER = 'input_filter';
 
     protected $inputFilter;
-    protected $response;
+    protected $responseFactory;
 
     /**
      * @return InputFilterInterface
@@ -47,26 +47,28 @@ class ContentValidationMiddleware implements MiddlewareInterface
 
     public function __construct(
         InputFilterPluginManager $inputFilters = null,
-        callable $invalidHandler = null,
-        ResponseInterface $response = null
+        ?callable $invalidHandler = null,
+        ?callable $responseFactory = null
     ) {
-        $this->response = $response;
+        if ($inputFilters) {
+            $this->setInputFilterManager($inputFilters);
+        }
 
         $this->setInvalidHandler(
             $invalidHandler ?: $this->getDefaultInvalidHandler()
         );
 
-        if ($inputFilters) {
-            $this->setInputFilterManager($inputFilters);
+        if ($responseFactory) {
+            $this->setResponseFactory($responseFactory);
         }
     }
 
     /**
-     * @param ResponseInterface $response
+     * @param callable $responseFactory
      */
-    public function setResponse(ResponseInterface $response)
+    public function setResponseFactory(callable $responseFactory)
     {
-        $this->response = $response;
+        $this->responseFactory = $responseFactory;
     }
 
     public function process(
@@ -111,7 +113,12 @@ class ContentValidationMiddleware implements MiddlewareInterface
         if (! $inputFilter->isValid()) {
             $invalidHandler = $this->getInvalidHandler();
 
-            return $invalidHandler($this, $request, $handler, $this->response);
+            return $invalidHandler(
+                $this,
+                $request,
+                $handler,
+                ($this->responseFactory)()
+            );
         }
 
         return $handler->handle($request);

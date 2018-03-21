@@ -32,7 +32,12 @@ class ContentValidationMiddlewareTest extends TestCase
             'factories' => [
                 InputFilterPluginManager::class => InputFilterPluginManagerFactory::class,
                 ContentValidationMiddleware::class => ContentValidationMiddlewareFactory::class,
-            ]
+                ResponseInterface::class => function () {
+                    return function () {
+                        return new Response();
+                    };
+                }
+            ],
         ]);
         $inputFilterPluginManager = $sl->get(InputFilterPluginManager::class);
         $inputFilterPluginManager->configure(
@@ -226,10 +231,7 @@ class ContentValidationMiddlewareTest extends TestCase
         $responseBody = null
     ) {
 
-        $response = new Response();
-
         $middleware = $this->container->get(ContentValidationMiddleware::class);
-        $middleware->setResponse($response);
         $request = $request->withAttribute(
             ContentValidationMiddleware::INPUT_FILTER_NAME,
             $inputFilterName
