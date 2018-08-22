@@ -14,47 +14,66 @@ use PHPUnit\Framework\TestCase;
 
 class RouteNameContentValidationMiddlewareTest extends TestCase
 {
+    public function testExistsInputFilterName()
+    {
+        $middleware = new RouteNameContentValidationMiddleware();
+
+        $req = $this->prophesize(ServerRequestInterface::class);
+        $req->getAttribute(ContentValidationMiddleware::INPUT_FILTER_NAME)
+            ->willReturn('test')
+            ->shouldBeCalledTimes(2);
+
+        $middleware->process($req->reveal(), $this->getHandler());
+    }
+
     public function testProcessExpressive()
     {
         $middleware = new RouteNameContentValidationMiddleware();
+
         $routeResult = $this->prophesize(RouteResult::class);
         $routeResult->getMatchedRouteName()->willReturn('test')->shouldBeCalled();
-        $req2 = $this->prophesize(ServerRequestInterface::class);
-        $req2->getAttribute(ContentValidationMiddleware::INPUT_FILTER_NAME)->shouldBeCalled();
+
         $req = $this->prophesize(ServerRequestInterface::class);
+        $req->getAttribute(ContentValidationMiddleware::INPUT_FILTER_NAME)->willReturn(null);
         $req->getAttribute('Zend\Expressive\Router\RouteResult')
             ->willReturn($routeResult->reveal())
             ->shouldBeCalled();
-        $req->withAttribute(ContentValidationMiddleware::INPUT_FILTER_NAME, 'test')
-            ->willReturn($req2->reveal())
-            ->shouldBeCalled();
+        $this->withAttribute($req);
 
-        $handler = $this->createMock(RequestHandlerInterface::class);
-        $handler->method('handle')->willReturn(new Response());
-
-        $middleware->process($req->reveal(), $handler);
+        $middleware->process($req->reveal(), $this->getHandler());
     }
+
     public function testProcessSlim()
     {
         $middleware = new RouteNameContentValidationMiddleware();
 
+        $routeResult = $this->prophesize(Route::class);
+        $routeResult->getName()->willReturn('test')->shouldBeCalled();
+
+        $req = $this->prophesize(ServerRequestInterface::class);
+        $req->getAttribute(ContentValidationMiddleware::INPUT_FILTER_NAME)->willReturn(null);
+        $req->getAttribute('Zend\Expressive\Router\RouteResult')->willReturn(null)->shouldBeCalled();
+        $req->getAttribute('route')->willReturn($routeResult);
+        $this->withAttribute($req);
+
+        $middleware->process($req->reveal(), $this->getHandler());
+    }
+
+    private function withAttribute($req, $value = 'test')
+    {
         $req2 = $this->prophesize(ServerRequestInterface::class);
         $req2->getAttribute(ContentValidationMiddleware::INPUT_FILTER_NAME)->shouldBeCalled();
-        $req = $this->createMock(ServerRequestInterface::class);
-        $req->method('getAttribute')->willReturnCallback(function ($name) {
-            $routeResult = $this->createMock(Route::class);
-            $routeResult->method('getName')
-                ->willReturn('test');
-            if ($name == 'route') {
-                return $routeResult;
-            }
-        });
-        $req->method('withAttribute')
-            ->willReturn($req2->reveal());
 
+        $req->withAttribute(ContentValidationMiddleware::INPUT_FILTER_NAME, $value)
+            ->willReturn($req2)
+            ->shouldBeCalled();
+    }
+
+    private function getHandler(): RequestHandlerInterface
+    {
         $handler = $this->createMock(RequestHandlerInterface::class);
         $handler->method('handle')->willReturn(new Response());
 
-        $middleware->process($req, $handler);
+        return $handler;
     }
 }
