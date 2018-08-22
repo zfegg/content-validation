@@ -12,6 +12,10 @@ class RouteNameContentValidationMiddleware extends ContentValidationMiddleware
         ServerRequestInterface $request,
         RequestHandlerInterface $handler
     ): ResponseInterface {
+        if ($request->getAttribute(ContentValidationMiddleware::INPUT_FILTER_NAME)) {
+            return parent::process($request, $handler);
+        }
+
         // Set expressive route name or slim route name
         if ($route = $request->getAttribute('Zend\Expressive\Router\RouteResult')) {
             $request = $request->withAttribute(
