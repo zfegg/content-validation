@@ -3,17 +3,17 @@ namespace ZfeggTest\ContentValidation;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
-use Zend\EventManager\EventManager;
-use Zend\Http\PhpEnvironment\Request;
-use Zend\Http\PhpEnvironment\Response;
-use Zend\InputFilter\Factory;
-use Zend\InputFilter\InputFilterPluginManager;
-use Zend\InputFilter\InputFilterPluginManagerFactory;
-use Zend\Mvc\ApplicationInterface;
-use Zend\Mvc\MvcEvent;
-use Zend\Router\Http\RouteMatch;
-use Zend\ServiceManager\ServiceManager;
-use Zend\Stdlib\Parameters;
+use Laminas\EventManager\EventManager;
+use Laminas\Http\PhpEnvironment\Request;
+use Laminas\Http\PhpEnvironment\Response;
+use Laminas\InputFilter\Factory;
+use Laminas\InputFilter\InputFilterPluginManager;
+use Laminas\InputFilter\InputFilterPluginManagerFactory;
+use Laminas\Mvc\ApplicationInterface;
+use Laminas\Mvc\MvcEvent;
+use Laminas\Router\Http\RouteMatch;
+use Laminas\ServiceManager\ServiceManager;
+use Laminas\Stdlib\Parameters;
 use Zfegg\ContentValidation\ContentValidationListener;
 use Zfegg\ContentValidation\ContentValidationListenerFactory;
 

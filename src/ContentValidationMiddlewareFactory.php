@@ -4,7 +4,7 @@ namespace Zfegg\ContentValidation;
 
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
-use Zend\InputFilter\InputFilterPluginManager;
+use Laminas\InputFilter\InputFilterPluginManager;
 
 class ContentValidationMiddlewareFactory
 {

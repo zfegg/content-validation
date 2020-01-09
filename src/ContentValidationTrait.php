@@ -1,8 +1,8 @@
 <?php
 namespace Zfegg\ContentValidation;
 
-use Zend\InputFilter\InputFilterPluginManager;
-use Zend\ServiceManager\ServiceManager;
+use Laminas\InputFilter\InputFilterPluginManager;
+use Laminas\ServiceManager\ServiceManager;
 
 trait ContentValidationTrait
 {
