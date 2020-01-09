@@ -7,8 +7,8 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Zend\InputFilter\InputFilterInterface;
-use Zend\InputFilter\InputFilterPluginManager;
+use Laminas\InputFilter\InputFilterInterface;
+use Laminas\InputFilter\InputFilterPluginManager;
 
 /**
  * Class ContentValidation
@@ -23,7 +23,10 @@ class ContentValidationMiddleware implements MiddlewareInterface
     const INPUT_FILTER = 'input_filter';
 
     protected $inputFilter;
+
     protected $responseFactory;
+
+    protected $overwriteParsedBody = false;
 
     /**
      * @return InputFilterInterface
@@ -48,7 +51,8 @@ class ContentValidationMiddleware implements MiddlewareInterface
     public function __construct(
         InputFilterPluginManager $inputFilters = null,
         ?callable $invalidHandler = null,
-        ?callable $responseFactory = null
+        ?callable $responseFactory = null,
+        bool $overwriteParsedBody = false
     ) {
         if ($inputFilters) {
             $this->setInputFilterManager($inputFilters);
@@ -61,6 +65,8 @@ class ContentValidationMiddleware implements MiddlewareInterface
         if ($responseFactory) {
             $this->setResponseFactory($responseFactory);
         }
+
+        $this->overwriteParsedBody = $overwriteParsedBody;
     }
 
     /**
@@ -119,6 +125,10 @@ class ContentValidationMiddleware implements MiddlewareInterface
                 $handler,
                 ($this->responseFactory)()
             );
+        }
+
+        if ($this->overwriteParsedBody) {
+            $request = $request->withParsedBody($inputFilter->getValues());
         }
 
         return $handler->handle($request);

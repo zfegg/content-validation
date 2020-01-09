@@ -2,10 +2,10 @@
 
 namespace Zfegg\ContentValidation;
 
-use Zend\EventManager\AbstractListenerAggregate;
-use Zend\EventManager\EventManagerInterface;
-use Zend\Mvc\MvcEvent;
-use Zend\Stdlib\ResponseInterface;
+use Laminas\EventManager\AbstractListenerAggregate;
+use Laminas\EventManager\EventManagerInterface;
+use Laminas\Mvc\MvcEvent;
+use Laminas\Stdlib\ResponseInterface;
 
 /**
  * Class ContentValidation
@@ -30,7 +30,7 @@ class ContentValidationListener extends AbstractListenerAggregate
 
     public function onInvalid(MvcEvent $e)
     {
-        /** @var \Zend\Http\PhpEnvironment\Response $response */
+        /** @var \Laminas\Http\PhpEnvironment\Response $response */
         $response = $e->getResponse();
 
         $response->setStatusCode(422);
@@ -46,7 +46,7 @@ class ContentValidationListener extends AbstractListenerAggregate
 
     public function validation(MvcEvent $e)
     {
-        /** @var \Zend\Http\PhpEnvironment\Request $request */
+        /** @var \Laminas\Http\PhpEnvironment\Request $request */
         $request = $e->getRequest();
         $rm = $e->getRouteMatch();
         $controllerName = $rm->getParam('controller');

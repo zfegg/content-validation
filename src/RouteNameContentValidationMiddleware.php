@@ -17,7 +17,7 @@ class RouteNameContentValidationMiddleware extends ContentValidationMiddleware
         }
 
         // Set expressive route name or slim route name
-        if ($route = $request->getAttribute('Zend\Expressive\Router\RouteResult')) {
+        if ($route = $request->getAttribute('Mezzio\Router\RouteResult')) {
             $request = $request->withAttribute(
                 ContentValidationMiddleware::INPUT_FILTER_NAME,
                 $route->getMatchedRouteName()
