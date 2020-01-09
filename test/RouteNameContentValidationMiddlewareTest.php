@@ -5,9 +5,9 @@ namespace ZfeggTest\ContentValidation;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Slim\Route;
-use Zend\Diactoros\Response;
-use Zend\Diactoros\ServerRequestFactory;
-use Zend\Expressive\Router\RouteResult;
+use Laminas\Diactoros\Response;
+use Laminas\Diactoros\ServerRequestFactory;
+use Mezzio\Router\RouteResult;
 use Zfegg\ContentValidation\ContentValidationMiddleware;
 use Zfegg\ContentValidation\RouteNameContentValidationMiddleware;
 use PHPUnit\Framework\TestCase;
@@ -35,7 +35,7 @@ class RouteNameContentValidationMiddlewareTest extends TestCase
 
         $req = $this->prophesize(ServerRequestInterface::class);
         $req->getAttribute(ContentValidationMiddleware::INPUT_FILTER_NAME)->willReturn(null);
-        $req->getAttribute('Zend\Expressive\Router\RouteResult')
+        $req->getAttribute('Mezzio\Router\RouteResult')
             ->willReturn($routeResult->reveal())
             ->shouldBeCalled();
         $this->withAttribute($req);
@@ -52,7 +52,7 @@ class RouteNameContentValidationMiddlewareTest extends TestCase
 
         $req = $this->prophesize(ServerRequestInterface::class);
         $req->getAttribute(ContentValidationMiddleware::INPUT_FILTER_NAME)->willReturn(null);
-        $req->getAttribute('Zend\Expressive\Router\RouteResult')->willReturn(null)->shouldBeCalled();
+        $req->getAttribute('Mezzio\Router\RouteResult')->willReturn(null)->shouldBeCalled();
         $req->getAttribute('route')->willReturn($routeResult);
         $this->withAttribute($req);
 
