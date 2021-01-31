@@ -1,9 +1,10 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace Zfegg\ContentValidation;
 
 use Laminas\EventManager\AbstractListenerAggregate;
 use Laminas\EventManager\EventManagerInterface;
+use Laminas\InputFilter\InputFilterPluginManager;
 use Laminas\Mvc\MvcEvent;
 use Laminas\Stdlib\ResponseInterface;
 
@@ -18,6 +19,11 @@ class ContentValidationListener extends AbstractListenerAggregate
     const EVENT_VALIDATE_INVALID = 'content-validation.invalid';
     const INPUT_FILTER_NAME = 'Zfegg\ContentValidation\InputFilter';
 
+    public function __construct(?InputFilterPluginManager $inputFilterManager = null)
+    {
+        $this->inputFilterManager = $inputFilterManager;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -28,7 +34,7 @@ class ContentValidationListener extends AbstractListenerAggregate
         $events->attach(self::EVENT_VALIDATE_INVALID, [$this, 'onInvalid'], -$priority);
     }
 
-    public function onInvalid(MvcEvent $e)
+    public function onInvalid(MvcEvent $e): ResponseInterface
     {
         /** @var \Laminas\Http\PhpEnvironment\Response $response */
         $response = $e->getResponse();
@@ -44,6 +50,9 @@ class ContentValidationListener extends AbstractListenerAggregate
         return $response;
     }
 
+    /**
+     * @return ResponseInterface|void
+     */
     public function validation(MvcEvent $e)
     {
         /** @var \Laminas\Http\PhpEnvironment\Request $request */
@@ -55,7 +64,7 @@ class ContentValidationListener extends AbstractListenerAggregate
         $inputFilterName = $controllerName . '::' . $action;
 
         $inputFilters = $this->getInputFilterManager();
-        if (!$inputFilters->has($inputFilterName)) {
+        if (! $inputFilters->has($inputFilterName)) {
             return ;
         }
 
@@ -90,7 +99,7 @@ class ContentValidationListener extends AbstractListenerAggregate
 
         $inputFilter->setData($e->getParam('input_filter_data'));
 
-        if (!$inputFilter->isValid()) {
+        if (! $inputFilter->isValid()) {
             $e->setName(self::EVENT_VALIDATE_INVALID);
             $results = $events->triggerEventUntil(function ($result) {
                 return $result instanceof ResponseInterface;
