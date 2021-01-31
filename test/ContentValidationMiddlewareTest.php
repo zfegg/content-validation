@@ -1,11 +1,12 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace ZfeggTest\ContentValidation;
 
+use Laminas\InputFilter\InputFilterInterface;
 use PHPUnit\Framework\TestCase;
-use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Laminas\Diactoros\Response;
 use Laminas\Diactoros\ServerRequest;
@@ -20,12 +21,12 @@ use Zfegg\ContentValidation\ContentValidationMiddlewareFactory;
 class ContentValidationMiddlewareTest extends TestCase
 {
     /**
-     * @var ContainerInterface
+     * @var \Psr\Container\ContainerInterface
      */
-    private $container;
+    public $container;
 
 
-    public function setUp()
+    public function setUp(): void
     {
         $sl = new ServiceManager();
         $sl->configure([
@@ -86,7 +87,7 @@ class ContentValidationMiddlewareTest extends TestCase
         $this->container = $sl;
     }
 
-    public function invokeProvider()
+    public function invokeProvider(): array
     {
 
         $file = [
@@ -219,17 +220,16 @@ class ContentValidationMiddlewareTest extends TestCase
      * @dataProvider invokeProvider
      *
      * @param               $inputFilterName
-     * @param ServerRequest $request
      * @param null          $responseBody
      *
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
     public function testInvoke(
-        $inputFilterName,
+        string $inputFilterName,
         ServerRequest $request,
         $responseBody = null
-    ) {
+    ): void {
 
         $middleware = $this->container->get(ContentValidationMiddleware::class);
         $request = $request->withAttribute(
@@ -241,10 +241,13 @@ class ContentValidationMiddlewareTest extends TestCase
             $request,
             new class($this, $middleware) implements RequestHandlerInterface
             {
+                /** @var MiddlewareInterface  */
                 protected $middleware;
+
+                /** @var self  */
                 protected $parent;
 
-                public function __construct($self, $middleware)
+                public function __construct(TestCase $self, MiddlewareInterface $middleware)
                 {
                     $this->middleware = $middleware;
                     $this->parent = $self;
@@ -253,13 +256,15 @@ class ContentValidationMiddlewareTest extends TestCase
                 public function handle(ServerRequestInterface $request): ResponseInterface
                 {
 
-                    $inputFilter = $request->getAttribute(
-                        ContentValidationMiddleware::INPUT_FILTER
-                    );
-                    $this->parent->assertEquals(
-                        $this->middleware->getInputFilter(),
-                        $inputFilter
-                    );
+                    $inputFilter = $request->getAttribute(ContentValidationMiddleware::INPUT_FILTER);
+                    $inputFilterName = $request->getAttribute(ContentValidationMiddleware::INPUT_FILTER_NAME);
+
+                    if ($this->parent->container->get(InputFilterPluginManager::class)->has($inputFilterName)) {
+                        $this->parent->assertInstanceOf(
+                            InputFilterInterface::class,
+                            $inputFilter
+                        );
+                    }
 
                     $this->parent->assertInstanceOf(
                         ServerRequestInterface::class,
@@ -283,8 +288,8 @@ class ContentValidationMiddlewareTest extends TestCase
                 );
             } elseif (is_array($responseBody)) {
 //                echo (string)$response->getBody(), "\n";
-                $this->assertArraySubset(
-                    $responseBody,
+                $this->assertArrayHasKey(
+                    'validation_messages',
                     json_decode((string)$response->getBody(), true)
                 );
             }

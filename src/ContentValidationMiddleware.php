@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace Zfegg\ContentValidation;
 
@@ -22,59 +22,25 @@ class ContentValidationMiddleware implements MiddlewareInterface
     const INPUT_FILTER_NAME = 'Zfegg\ContentValidation\InputFilter';
     const INPUT_FILTER = 'input_filter';
 
-    protected $inputFilter;
-
+    /** @var callable|null  */
     protected $responseFactory;
 
-    protected $overwriteParsedBody = false;
+    /** @var bool  */
+    protected $overwriteParsedBody = true;
 
-    /**
-     * @return InputFilterInterface
-     */
-    public function getInputFilter()
-    {
-        return $this->inputFilter;
-    }
-
-    /**
-     * @param InputFilterInterface $inputFilter
-     *
-     * @return $this
-     */
-    public function setInputFilter(InputFilterInterface $inputFilter)
-    {
-        $this->inputFilter = $inputFilter;
-
-        return $this;
-    }
+    /** @var callable  */
+    protected $invalidHandler;
 
     public function __construct(
-        InputFilterPluginManager $inputFilters = null,
+        ?InputFilterPluginManager $inputFilters = null,
         ?callable $invalidHandler = null,
         ?callable $responseFactory = null,
-        bool $overwriteParsedBody = false
+        bool $overwriteParsedBody = true
     ) {
-        if ($inputFilters) {
-            $this->setInputFilterManager($inputFilters);
-        }
-
-        $this->setInvalidHandler(
-            $invalidHandler ?: $this->getDefaultInvalidHandler()
-        );
-
-        if ($responseFactory) {
-            $this->setResponseFactory($responseFactory);
-        }
-
-        $this->overwriteParsedBody = $overwriteParsedBody;
-    }
-
-    /**
-     * @param callable $responseFactory
-     */
-    public function setResponseFactory(callable $responseFactory)
-    {
+        $this->inputFilterManager = $inputFilters;
+        $this->invalidHandler = $invalidHandler ?: $this->getDefaultInvalidHandler();
         $this->responseFactory = $responseFactory;
+        $this->overwriteParsedBody = $overwriteParsedBody;
     }
 
     public function process(
@@ -94,7 +60,6 @@ class ContentValidationMiddleware implements MiddlewareInterface
 
         $inputFilter = $inputFilters->get($inputFilterName);
 
-        $this->setInputFilter($inputFilter);
         $request = $request->withAttribute(self::INPUT_FILTER, $inputFilter);
 
         if ($request->getMethod() == 'GET') {
@@ -117,10 +82,8 @@ class ContentValidationMiddleware implements MiddlewareInterface
         $inputFilter->setData((array)$data);
 
         if (! $inputFilter->isValid()) {
-            $invalidHandler = $this->getInvalidHandler();
-
-            return $invalidHandler(
-                $this,
+            return ($this->invalidHandler)(
+                $inputFilter,
                 $request,
                 $handler,
                 ($this->responseFactory)()
@@ -142,7 +105,7 @@ class ContentValidationMiddleware implements MiddlewareInterface
      *
      * @return array
      */
-    public static function psr2ArrayFiles(array $psrFiles)
+    private static function psr2ArrayFiles(array $psrFiles): array
     {
         $files = [];
 
@@ -163,34 +126,11 @@ class ContentValidationMiddleware implements MiddlewareInterface
         return $files;
     }
 
-    protected $invalidHandler;
-
-    /**
-     *
-     * @return callable return ResponseInterface
-     */
-    public function getInvalidHandler()
-    {
-        return $this->invalidHandler;
-    }
-
-    /**
-     * @param callable $invalidHandler
-     *
-     * @return $this
-     */
-    public function setInvalidHandler(callable $invalidHandler)
-    {
-        $this->invalidHandler = $invalidHandler;
-
-        return $this;
-    }
-
-    public function getDefaultInvalidHandler()
+    public function getDefaultInvalidHandler(): callable
     {
         return function (
-            $self,
-            $request,
+            InputFilterInterface $inputFilter,
+            ServerRequestInterface $request,
             RequestHandlerInterface $handler,
             ResponseInterface $response = null
         ) {
@@ -198,7 +138,7 @@ class ContentValidationMiddleware implements MiddlewareInterface
                 throw new Exception\InvalidRequestException(
                     'Failed Validation.',
                     422,
-                    $this->getInputFilter()
+                    $inputFilter
                 );
             }
 
@@ -212,8 +152,7 @@ class ContentValidationMiddleware implements MiddlewareInterface
                     [
                         'status'              => 422,
                         'detail'              => 'Failed Validation',
-                        'validation_messages' => $this->getInputFilter()
-                            ->getMessages(),
+                        'validation_messages' => $inputFilter->getMessages(),
                     ]
                 )
             );

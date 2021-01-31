@@ -1,8 +1,9 @@
-<?php
+<?php declare(strict_types = 1);
+
 namespace ZfeggTest\ContentValidation;
 
+use Laminas\Stdlib\RequestInterface;
 use PHPUnit\Framework\TestCase;
-use Psr\Container\ContainerInterface;
 use Laminas\EventManager\EventManager;
 use Laminas\Http\PhpEnvironment\Request;
 use Laminas\Http\PhpEnvironment\Response;
@@ -20,12 +21,12 @@ use Zfegg\ContentValidation\ContentValidationListenerFactory;
 class ContentValidationListenerTest extends TestCase
 {
     /**
-     * @var ContainerInterface
+     * @var \Psr\Container\ContainerInterface
      */
     private $container;
 
 
-    public function setUp()
+    public function setUp(): void
     {
         $sl = new ServiceManager();
         $sl->configure([
@@ -84,7 +85,7 @@ class ContentValidationListenerTest extends TestCase
         $this->container = $sl;
     }
 
-    public function invokeProvider()
+    public function invokeProvider(): array
     {
         return [
             'NotFoundInputFilterWithInputFilters' => [
@@ -127,9 +128,15 @@ class ContentValidationListenerTest extends TestCase
     /**
      *
      * @dataProvider invokeProvider
+     * @param null|string|array $responseBody
+     * @param array|Response|null $prepareReturnData
      */
-    public function testInvoke($action, $request, $responseBody = null, $prepareReturnData = null)
-    {
+    public function testInvoke(
+        string $action,
+        RequestInterface $request,
+        $responseBody = null,
+        $prepareReturnData = null
+    ): void {
 
         $events = new EventManager();
         $mockApplication = $this->createMock(ApplicationInterface::class);
@@ -162,14 +169,17 @@ class ContentValidationListenerTest extends TestCase
                 $this->assertEquals($responseBody, (string)$response->getContent());
             } elseif (is_array($responseBody)) {
 //                echo (string)$response->getBody(), "\n";
-                $this->assertArraySubset($responseBody, json_decode((string)$response->getContent(), true));
+                $this->assertArrayHasKey('validation_messages', json_decode((string)$response->getContent(), true));
             }
         } else {
             $this->assertEquals(200, $response->getStatusCode(), 'Body' . $response->getContent());
         }
     }
 
-    private function attachPreValidation(EventManager $events, $data)
+    /**
+     * @param array|Response|null $data
+     */
+    private function attachPreValidation(EventManager $events, $data): void
     {
         $events->attach(ContentValidationListener::EVENT_VALIDATE_PREPARE, function (MvcEvent $e) use ($data) {
             return $data;
