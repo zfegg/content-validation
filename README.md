@@ -1,4 +1,4 @@
-内容验证器
+PSR-15 内容验证器
 ===========================
 
 [![Build Status](https://travis-ci.org/zfegg/content-validation.png)](https://travis-ci.org/zfegg/content-validation)
