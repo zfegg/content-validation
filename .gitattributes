@@ -5,6 +5,6 @@
 /.travis.yml export-ignore
 /.travis/ export-ignore
 /docs/ export-ignore
-/phpcs.xml.dist export-ignore
-/phpunit.xml.dist export-ignore
+/phpcs.xml export-ignore
+/phpunit.xml export-ignore
 /test/ export-ignore
