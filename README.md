@@ -5,17 +5,12 @@ PSR-15 Content Validation / PSR-15 内容验证器
 [![Coverage Status](https://coveralls.io/repos/github/zfegg/content-validation/badge.svg?branch=master)](https://coveralls.io/github/zfegg/content-validation?branch=master)
 [![Latest Stable Version](https://poser.pugx.org/zfegg/content-validation/v/stable.png)](https://packagist.org/packages/zfegg/content-validation)
 
-Content validation for PSR-15 middleware or laminas-mvc listener. 
-Based on [`laminias/laminas-inputfilter`](https://github.com/laminas/laminas-inputfilter).
+Content validation for PSR-15 middleware. 
+Based on [`opis/json-schema`](https://packagist.org/packages/opis/json-schema).
 
 
-用于 PSR-15 中间件或 laminas-mvc 的内容验证。
-内容验证使用 [`laminias/laminas-inputfilter`](https://github.com/laminas/laminas-inputfilter)组件.
-
-
-* `ContentValidationMiddleware` PSR-15 Middleware / PSR-15 中间件
-* `ContentValidationListener`  laminias-mvc listener / laminas-mvc 监听器
-
+基于 PSR-15 内容验证中间件。
+内容验证使用 [`opis/json-schema`](https://packagist.org/packages/opis/json-schema).
 
 Installation / 安装使用
 -----------------------
@@ -45,32 +40,30 @@ $aggregator = new ConfigAggregator(
 return $aggregator->getMergedConfig();
 ```
 
-Add input filter config. / 添加 input filter 配置.
-
-```php
-return [
-    'input_filter_specs' => [
-        'api.users.create' => [
-            ['name' => 'username',],
-            ['name' => 'age',],
-        ]
-    ],
-];
-```
-
-Get input filter in handler. / 在处理程序中获取 input filter.
 
 ```php
 $app->post(
   '/api/users', 
    [
-   \Zfegg\ContentValidation\RouteNameContentValidationMiddleware::class,
+   \Zfegg\ContentValidation\ContentValidationMiddleware::class,
     function (\Psr\Http\Message\ServerRequestInterface $request) {
-        /** @var \Laminas\InputFilter\InputFilterInterface $filter */
-        $filter = $request->getAttribute('input_filter');
-        $data = $filter->getValues(); // Get valid data.
+        $data = $request->getParsedBody(); // Get valid data.
     }
-], 'api.users.create');
+], 'api.users.create')
+->setOptions(['schema' => 'path-to-json-schema.json'])
+//->setOptions([  
+//   // or set json-schema object. 
+//  'schema' => (object) [
+//        'type' => 'object',
+//        'properties' => (object) [
+//             'age' => (object) [
+//                 'type' => 'integer'
+//              ]
+//        ],
+//        'required' => ['age']
+//   ]
+// ])
+;
 ```
 
 Invalid request will response status 422. / 无效请求将响应 422状态码.
@@ -84,9 +77,24 @@ HTTP/1.1 422
   "status": 422,
   "detail": "Failed Validation",
   "validation_messages": {
-    "age": {
-      "isNotEmpty": "Required message."
-    }
+    "age": [
+      "The required properties (age) are missing"
+    ]
   }
 }
+```
+
+
+### Slim 
+
+```php
+$app->post(
+  '/api/users', 
+  function (\Psr\Http\Message\ServerRequestInterface $request) {
+        $data = $request->getParsedBody(); // Get valid data.
+  }
+)
+->add(\Zfegg\ContentValidation\ContentValidationMiddleware::class)
+->setArgument('schema', 'path-to-json-schema.json')
+;
 ```
