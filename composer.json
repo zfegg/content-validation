@@ -17,15 +17,16 @@
     "license": "MIT",
     "require-dev": {
         "ext-pdo": "*",
-        "slevomat/coding-standard": "^7.0.12",
-        "phpunit/phpunit": "^9.4",
-        "laminas/laminas-eventmanager": "^3.0",
-        "laminas/laminas-diactoros": "^2.5",
-        "mezzio/mezzio-router": "^3.0",
-        "slim/slim": "^4.8.1",
-        "phpspec/prophecy-phpunit": "^2.0",
+        "doctrine/cache": "^1.11",
         "doctrine/orm": "^2.9",
-        "doctrine/cache": "^1.11"
+        "laminas/laminas-diactoros": "^2.5",
+        "laminas/laminas-eventmanager": "^3.0",
+        "laminas/laminas-servicemanager": "^3.7",
+        "mezzio/mezzio-router": "^3.0",
+        "phpspec/prophecy-phpunit": "^2.0",
+        "phpunit/phpunit": "^9.4",
+        "slevomat/coding-standard": "^7.0.12",
+        "slim/slim": "^4.8.1"
     },
     "autoload": {
         "psr-4": {
@@ -47,5 +48,8 @@
         "laminas": {
             "config-provider": "Zfegg\\ContentValidation\\ConfigProvider"
         }
+    },
+    "config": {
+        "sort-packages": true
     }
 }

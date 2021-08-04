@@ -1,5 +1,5 @@
 name: qa
-on: [push, pull_request]
+on: [push]
 jobs:
   qa:
     name: QA (PHP ${{ matrix.php-versions }} on ${{ matrix.operating-system }})
