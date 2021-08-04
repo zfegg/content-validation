@@ -1,163 +1,138 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types = 1);
 
 namespace Zfegg\ContentValidation;
 
+use Laminas\Diactoros\Response\JsonResponse;
+use Opis\JsonSchema\Errors\ErrorFormatter;
+use Opis\JsonSchema\Errors\ValidationError;
+use Opis\JsonSchema\ValidationResult;
+use Opis\JsonSchema\Validator;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\UploadedFileInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Laminas\InputFilter\InputFilterInterface;
-use Laminas\InputFilter\InputFilterPluginManager;
 
-/**
- * Class ContentValidation
- *
- * @package Zfegg\Psr7Middleware
- */
 class ContentValidationMiddleware implements MiddlewareInterface
 {
-    use ContentValidationTrait;
-
-    const INPUT_FILTER_NAME = 'Zfegg\ContentValidation\InputFilter';
-    const INPUT_FILTER = 'input_filter';
-
-    /** @var callable|null  */
-    protected $responseFactory;
-
-    /** @var bool  */
-    protected $overwriteParsedBody = true;
+    const SCHEMA = 'schema';
 
     /** @var callable  */
     protected $invalidHandler;
+    private Validator $validator;
+    private bool $routeNameWithMethod;
+    private bool $transformObjectToArray;
 
     public function __construct(
-        ?InputFilterPluginManager $inputFilters = null,
+        Validator $validator,
         ?callable $invalidHandler = null,
-        ?callable $responseFactory = null,
-        bool $overwriteParsedBody = true
+        bool $routeNameWithMethod = true,
+        bool $transformObjectToArray = true
     ) {
-        $this->inputFilterManager = $inputFilters;
-        $this->invalidHandler = $invalidHandler ?: $this->getDefaultInvalidHandler();
-        $this->responseFactory = $responseFactory;
-        $this->overwriteParsedBody = $overwriteParsedBody;
+        $this->validator = $validator;
+        $this->invalidHandler = $invalidHandler ?: \Closure::fromCallable([__CLASS__, 'defaultInvalidHandler']);
+        $this->routeNameWithMethod = $routeNameWithMethod;
+        $this->transformObjectToArray = $transformObjectToArray;
     }
 
-    public function process(
-        ServerRequestInterface $request,
-        RequestHandlerInterface $handler
-    ): ResponseInterface {
-        $inputFilterName = $request->getAttribute(self::INPUT_FILTER_NAME);
+    /**
+     * @return string|object|null
+     */
+    private function getSchema(ServerRequestInterface $request)
+    {
+        $withMethod = $this->routeNameWithMethod ? ":{$request->getMethod()}" : '';
+        if (($schema = $request->getAttribute(self::SCHEMA)) ||
+            ($schema = $request->getAttribute(self::SCHEMA . $withMethod))
+        ) {
+            return $schema;
+        }
 
-        if (! $inputFilterName) {
+        // Set Mezzio route name or slim route name
+        if ($route = $request->getAttribute('Mezzio\Router\RouteResult')) {
+            /** @var \Mezzio\Router\RouteResult $route */
+            $options = $route->getMatchedRoute()->getOptions();
+            return $options[self::SCHEMA . $withMethod] ?? null;
+        } elseif ($route = $request->getAttribute('route')) {
+            /** @var \Slim\Routing\Route $route */
+            return $route->getArgument(
+                self::SCHEMA . $withMethod,
+                $route->getArgument(self::SCHEMA . $withMethod)
+            );
+        }
+
+        return null;
+    }
+
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+    {
+        $schema = $this->getSchema($request);
+
+        if (! $schema) {
             return $handler->handle($request);
         }
 
-        $inputFilters = $this->getInputFilterManager();
-        if (! $inputFilters->has($inputFilterName)) {
-            return $handler->handle($request);
-        }
-
-        $inputFilter = $inputFilters->get($inputFilterName);
-
-        $request = $request->withAttribute(self::INPUT_FILTER, $inputFilter);
-
+        $fromParsedBody = false;
         if ($request->getMethod() == 'GET') {
             $data = $request->getQueryParams();
         } elseif (in_array($request->getMethod(), ['POST', 'PUT', 'PATCH'])) {
+            $fromParsedBody = true;
             $data = $request->getParsedBody();
         } else {
             return $handler->handle($request);
         }
 
-        /** @var UploadedFileInterface[] $files */
-        $files = $request->getUploadedFiles();
-        if (0 < count($files)) {
-            // File uploads are not validated for collections; impossible to
-            // match file fields to discrete sets
-            $files = self::psr2ArrayFiles($files);
-            $data = array_merge($data, $files);
-        }
+        $data = json_decode(json_encode($data));
+        $result = $this->validator->validate($data, $schema);
 
-        $inputFilter->setData((array)$data);
-
-        if (! $inputFilter->isValid()) {
+        if (! $result->isValid()) {
             return ($this->invalidHandler)(
-                $inputFilter,
+                $result,
                 $request,
-                $handler,
-                ($this->responseFactory)()
+                $handler
             );
         }
 
-        if ($this->overwriteParsedBody) {
-            $request = $request->withParsedBody($inputFilter->getValues());
+        $data = $this->transformObjectToArray ? self::object2Array($data) : $data;
+        if ($fromParsedBody) {
+            $request = $request->withParsedBody($data);
+        } else {
+            $request = $request->withAttribute('query', $data);
         }
 
         return $handler->handle($request);
     }
 
-
-    /**
-     * PSR Request UploadedFileInterface to `$_FILES` format
-     *
-     * @param array|UploadedFileInterface[] $psrFiles
-     *
-     * @return array
-     */
-    private static function psr2ArrayFiles(array $psrFiles): array
+    public static function defaultInvalidHandler(ValidationResult $result): ResponseInterface
     {
-        $files = [];
+        return new JsonResponse([
+            'status'              => 422,
+            'detail'              => 'Failed Validation',
+            'validation_messages' => (new ErrorFormatter())->format(
+                $result->error(),
+                true,
+                null,
+                function (ValidationError $error) {
+                    $sub = '';
+                    if ($error->keyword() == 'required') {
+                        $sub = $error->args()['missing'][0];
+                    }
 
-        foreach ($psrFiles as $name => $file) {
-            if ($file instanceof UploadedFileInterface) {
-                $files[$name] = [
-                    'name'     => $file->getClientFilename(),
-                    'type'     => $file->getClientMediaType(),
-                    'tmp_name' => $file->getStream()->getMetadata('uri'),
-                    'error'    => $file->getError(),
-                    'size'     => $file->getSize(),
-                ];
-            } elseif (is_array($file)) {
-                $files[$name] = self::psr2ArrayFiles($file);
+                    return implode('/', $error->data()->fullPath()) . $sub;
+                }
+            ),
+        ], 422);
+    }
+
+    private static function object2Array(object $data): array
+    {
+        $data = (array) $data;
+        foreach ($data as $key => $value) {
+            if (is_object($value)) {
+                $data[$key] = self::object2Array($value);
             }
         }
 
-        return $files;
-    }
-
-    public function getDefaultInvalidHandler(): callable
-    {
-        return function (
-            InputFilterInterface $inputFilter,
-            ServerRequestInterface $request,
-            RequestHandlerInterface $handler,
-            ResponseInterface $response = null
-        ) {
-            if (! $response) {
-                throw new Exception\InvalidRequestException(
-                    'Failed Validation.',
-                    422,
-                    $inputFilter
-                );
-            }
-
-            $response = $response->withStatus(422);
-            $response = $response->withHeader(
-                'Content-Type',
-                'application/json'
-            );
-            $response->getBody()->write(
-                json_encode(
-                    [
-                        'status'              => 422,
-                        'detail'              => 'Failed Validation',
-                        'validation_messages' => $inputFilter->getMessages(),
-                    ]
-                )
-            );
-
-            return $response;
-        };
+        return $data;
     }
 }
