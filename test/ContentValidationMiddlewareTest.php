@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace ZfeggTest\ContentValidation;
 
@@ -11,7 +11,6 @@ use Mezzio\Router\RouteResult;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Zfegg\ContentValidation\ContentValidationMiddleware;
 
@@ -60,7 +59,7 @@ class ContentValidationMiddlewareTest extends TestCase
                     [],
                     [],
                 ),
-                [],
+                false,
             ],
             'HttpPostValid' => [
                 'test:test/test.json',
@@ -89,7 +88,7 @@ class ContentValidationMiddlewareTest extends TestCase
                     [],
                     ['name' => 'foo']
                 ),
-                [],
+                false,
             ],
             'IgnoreWithCustomMethod' => [
                 'test',
@@ -112,10 +111,8 @@ class ContentValidationMiddlewareTest extends TestCase
      *
      * @dataProvider invokeProvider
      * @param string|array|null $schema
-     * @param ServerRequest $request
-     * @param mixed $responseBody
      */
-    public function testInvoke($schema, ServerRequest $request, $success = true): void
+    public function testInvoke($schema, ServerRequest $request, bool $success = true): void
     {
         $middleware = $this->container->get(ContentValidationMiddleware::class);
         $request = $request->withAttribute(ContentValidationMiddleware::SCHEMA, $schema);
@@ -133,7 +130,6 @@ class ContentValidationMiddlewareTest extends TestCase
         if ($success) {
             $this->assertEquals('success', (string)$response->getBody());
         } else {
-//                echo (string)$response->getBody(), "\n";
             $this->assertArrayHasKey(
                 'validation_messages',
                 json_decode((string)$response->getBody(), true)

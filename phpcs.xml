@@ -39,15 +39,17 @@
     <rule ref="SlevomatCodingStandard.TypeHints.ReturnTypeHintSpacing" />
     <rule ref="SlevomatCodingStandard.TypeHints.ReturnTypeHint" >
         <exclude name="SlevomatCodingStandard.TypeHints.ReturnTypeHint.MissingTraversableTypeHintSpecification" />
+        <properties>
+            <property name="enableUnionTypeHint" value="false" />
+            <property name="enableMixedTypeHint" value="false" />
+        </properties>
     </rule>
     <rule ref="SlevomatCodingStandard.TypeHints.UselessConstantTypeHint" />
     <rule ref="SlevomatCodingStandard.TypeHints.ParameterTypeHint">
         <exclude name="SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingTraversableTypeHintSpecification" />
-    </rule>
-    <rule ref="SlevomatCodingStandard.TypeHints.PropertyTypeHint" >
-        <exclude name="SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingTraversableTypeHintSpecification" />
         <properties>
-            <property name="enableNativeTypeHint" value="false" />
+            <property name="enableUnionTypeHint" value="false" />
+            <property name="enableMixedTypeHint" value="false" />
         </properties>
     </rule>
     <rule ref="SlevomatCodingStandard.Namespaces.UnusedUses" />

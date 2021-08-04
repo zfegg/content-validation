@@ -1,13 +1,11 @@
 <?php
 
+declare(strict_types = 1);
 
 namespace Zfegg\ContentValidation\Opis;
 
-
-use Opis\JsonSchema\Helper;
 use Opis\JsonSchema\Info\SchemaInfo;
 use Opis\JsonSchema\Keyword;
-use Opis\JsonSchema\Keywords\TypeKeyword;
 use Opis\JsonSchema\Parsers\KeywordParser;
 use Opis\JsonSchema\Parsers\SchemaParser;
 

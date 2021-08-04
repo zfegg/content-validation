@@ -1,0 +1,36 @@
+{
+  "$id": "http://api.example.com/profile.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[a-zA-Z0-9\\-]+(\\s[a-zA-Z0-9\\-]+)*$"
+    },
+    "age": {
+      "type": "integer",
+      "minimum": 18,
+      "maximum": 100
+    },
+    "state": {
+      "type": "boolean",
+      "default": true
+    },
+    "sub" : {
+      "type": "object",
+      "properties": {
+        "foo" : {
+          "type": "number"
+        },
+        "bar" : {
+          "type": "string",
+          "default": "bar"
+        }
+      },
+      "required": ["foo", "bar"]
+    }
+  },
+  "required": ["name", "age"],
+  "additionalProperties": false
+}

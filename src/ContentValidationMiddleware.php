@@ -37,13 +37,12 @@ class ContentValidationMiddleware implements MiddlewareInterface
     }
 
     /**
-     * @return string|array|null
+     * @return string|object|null
      */
     private function getSchema(ServerRequestInterface $request)
     {
         $withMethod = $this->routeNameWithMethod ? ":{$request->getMethod()}" : '';
-        if (
-            ($schema = $request->getAttribute(self::SCHEMA)) ||
+        if (($schema = $request->getAttribute(self::SCHEMA)) ||
             ($schema = $request->getAttribute(self::SCHEMA . $withMethod))
         ) {
             return $schema;

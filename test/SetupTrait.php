@@ -1,8 +1,8 @@
 <?php
 
+declare(strict_types = 1);
 
 namespace ZfeggTest\ContentValidation;
-
 
 use Laminas\ServiceManager\ServiceManager;
 use Opis\JsonSchema\Validator;

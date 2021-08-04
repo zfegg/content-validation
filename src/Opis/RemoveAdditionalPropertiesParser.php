@@ -1,8 +1,8 @@
 <?php
 
+declare(strict_types = 1);
 
 namespace Zfegg\ContentValidation\Opis;
-
 
 use Opis\JsonSchema\Info\SchemaInfo;
 use Opis\JsonSchema\Keyword;
