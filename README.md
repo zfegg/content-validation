@@ -1,7 +1,7 @@
 PSR-15 Content Validation / PSR-15 内容验证器
 ===========================
 
-[![Build Status](https://travis-ci.org/zfegg/content-validation.png)](https://travis-ci.org/zfegg/content-validation)
+[![GitHub Actions: Run tests](https://github.com/zfegg/content-validation/workflows/qa/badge.svg)](https://github.com/zfegg/content-validation/actions?query=workflow%3A%22qa%22)
 [![Coverage Status](https://coveralls.io/repos/github/zfegg/content-validation/badge.svg?branch=master)](https://coveralls.io/github/zfegg/content-validation?branch=master)
 [![Latest Stable Version](https://poser.pugx.org/zfegg/content-validation/v/stable.png)](https://packagist.org/packages/zfegg/content-validation)
 
