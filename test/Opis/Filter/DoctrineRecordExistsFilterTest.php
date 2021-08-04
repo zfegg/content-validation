@@ -64,7 +64,7 @@ SQL;
         $this->assertTrue($rs);
     }
 
-    public function testInValidator()
+    public function testInValidator(): void
     {
         $validator = $this->container->get(Validator::class);
         $data = <<<'JSON'

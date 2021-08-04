@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace ZfeggTest\ContentValidation\Opis\Filter;
 
-use Doctrine\ORM\EntityManagerInterface;
 use Opis\JsonSchema\Schema;
 use Opis\JsonSchema\SchemaLoader;
 use Opis\JsonSchema\ValidationContext;
@@ -55,7 +54,7 @@ SQL;
     }
 
 
-    public function testInValidator()
+    public function testInValidator(): void
     {
         $validator = $this->container->get(Validator::class);
         $data = <<<'JSON'
