@@ -18,7 +18,7 @@ class ValidatorFactoryTest extends TestCase
         $data = <<<'JSON'
 {
     "name": "John Doe",
-    "age": "18",
+    "age": "18abcd",
     "unchecked": "sdf",
     "state": "0",
     "sub" : {
