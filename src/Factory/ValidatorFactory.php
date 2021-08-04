@@ -15,12 +15,40 @@ class ValidatorFactory
 {
     public function __invoke(ContainerInterface $container): Validator
     {
+        $config = $container->has('config') ? ($container->get('config')[Validator::class] ?? []) : [];
+
         $validator = new Validator();
         $parser = $validator->loader()->parser();
-        $parser->draft($parser->defaultDraftVersion())
-            ->prependKeyword(new TypeCastParser())
-            ->prependKeyword(new RemoveAdditionalPropertiesParser())
-        ;
+
+        foreach ($parser->supportedDrafts() as $draft) {
+            $parser->draft($draft)
+                ->prependKeyword(new TypeCastParser())
+                ->prependKeyword(new RemoveAdditionalPropertiesParser());
+        }
+
+        if (isset($config['resolvers'])) {
+            foreach ($config['resolvers'] as $key => $resolvers) {
+                foreach ($resolvers as $resolver) {
+                    $validator->resolver()->{'register' . ucfirst($key)}(...$resolver);
+                }
+            }
+        }
+
+        $filterResolver = $parser->getFilterResolver();
+        if (isset($config['filters'])) {
+            foreach ($config['filters'] as $name => $filter) {
+                $filter = is_string($filter) ? ['filter' => $container->get($filter)] : $filter;
+                $filter['filter'] = is_string($filter['filter'])
+                    ? $container->get($filter['filter'])
+                    : $filter['filter'];
+                $filterResolver->registerMultipleTypes($name, $filter['filter'], $filter['types'] ?? null);
+            }
+        }
+        if (isset($config['filterNs'])) {
+            foreach ($config['filterNs'] as $ns => $resolver) {
+                $filterResolver->registerNS($ns, is_string($resolver) ? $container->get($resolver) : $resolver);
+            }
+        }
 
         $types = ['string', 'integer', 'number'];
         $parser->getFilterResolver()->registerMultipleTypes(

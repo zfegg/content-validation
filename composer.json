@@ -3,9 +3,11 @@
     "description": "Content validation for PSR-15 middleware",
     "keywords": [
         "validation",
+        "content-validation",
         "middleware",
-        "laminas",
         "mezzio",
+        "slim",
+        "json-schema",
         "psr15"
     ],
     "require": {
