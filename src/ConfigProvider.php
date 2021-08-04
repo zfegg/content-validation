@@ -1,6 +1,10 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types = 1);
 
 namespace Zfegg\ContentValidation;
+
+use Opis\JsonSchema\Validator;
 
 class ConfigProvider
 {
@@ -11,7 +15,7 @@ class ConfigProvider
             'dependencies' => [
                 'factories' => [
                     ContentValidationMiddleware::class => ContentValidationMiddlewareFactory::class,
-                    RouteNameContentValidationMiddleware::class => ContentValidationMiddlewareFactory::class,
+                    Validator::class => Factory\ValidatorFactory::class,
                 ]
             ]
         ];

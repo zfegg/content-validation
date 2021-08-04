@@ -9,21 +9,23 @@
         "psr15"
     ],
     "require": {
-        "php": ">=7.3",
-        "laminas/laminas-inputfilter": "^2.7",
-        "laminas/laminas-servicemanager": "^3.1",
-        "psr/http-server-middleware": "^1.0"
+        "php": ">=7.4",
+        "psr/http-server-middleware": "^1.0",
+        "opis/json-schema": "^2.1",
+        "ext-json": "*"
     },
     "license": "MIT",
     "require-dev": {
-        "slevomat/coding-standard": "^6.4.1",
+        "ext-pdo": "*",
+        "slevomat/coding-standard": "^7.0.12",
         "phpunit/phpunit": "^9.4",
-        "laminas/laminas-mvc": "^3.0",
         "laminas/laminas-eventmanager": "^3.0",
         "laminas/laminas-diactoros": "^2.5",
         "mezzio/mezzio-router": "^3.0",
-        "slim/slim": "^3.9",
-        "phpspec/prophecy-phpunit": "^2.0"
+        "slim/slim": "^4.8.1",
+        "phpspec/prophecy-phpunit": "^2.0",
+        "doctrine/orm": "^2.9",
+        "doctrine/cache": "^1.11"
     },
     "autoload": {
         "psr-4": {

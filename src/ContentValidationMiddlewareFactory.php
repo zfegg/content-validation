@@ -1,37 +1,28 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types = 1);
 
 namespace Zfegg\ContentValidation;
 
+use Opis\JsonSchema\Validator;
 use Psr\Container\ContainerInterface;
-use Psr\Http\Message\ResponseInterface;
-use Laminas\InputFilter\InputFilterPluginManager;
 use Psr\Http\Server\MiddlewareInterface;
 
 class ContentValidationMiddlewareFactory
 {
 
-    public function __invoke(
-        ContainerInterface $container,
-        string $requestedName = null,
-        array $options = null
-    ): MiddlewareInterface {
+    public function __invoke(ContainerInterface $container): MiddlewareInterface
+    {
         $config = $container->has('config')
             ? $container->get('config')['zfegg'][ContentValidationMiddleware::class] ?? []
             : [];
-        $requestedName = $requestedName ?: ContentValidationMiddleware::class;
+        $container->get(Validator::class);
 
-        $response = $container->has(ResponseInterface::class) ?
-            $container->get(ResponseInterface::class) : null;
-
-        $inputFilterManager = $container->has(InputFilterPluginManager::class) ?
-            $container->get(InputFilterPluginManager::class) : null;
-
-        return new $requestedName(
-            $inputFilterManager,
+        return new ContentValidationMiddleware(
+            $container->get(Validator::class),
             null,
-            $response,
-            $config['overwrite_parsed_body'] ?? true,
-            $config['route_name_with_method'] ?? false
+            $config['route_name_with_method'] ?? true,
+            $config['transform_object_to_array'] ?? true,
         );
     }
 }
