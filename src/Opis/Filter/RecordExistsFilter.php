@@ -8,19 +8,24 @@ use Opis\JsonSchema\Filter;
 use Opis\JsonSchema\Schema;
 use Opis\JsonSchema\ValidationContext;
 use PDO;
+use Psr\Container\ContainerInterface;
 
 class RecordExistsFilter implements Filter
 {
 
-    private PDO $db;
+    private ContainerInterface $container;
+    private string $defaultId;
 
-    public function __construct(PDO $db)
+    public function __construct(ContainerInterface $container, string $defaultId = 'db')
     {
-        $this->db = $db;
+        $this->container = $container;
+        $this->defaultId = $defaultId;
     }
 
     public function validate(ValidationContext $context, Schema $schema, array $args = []): bool
     {
+        $db = $this->container->get($args['db'] ?? $this->defaultId);
+
         if (isset($args['sql'])) {
             $sql = $args['sql'];
         } elseif (isset($args['table']) && isset($args['field'])) {
@@ -30,7 +35,7 @@ class RecordExistsFilter implements Filter
         }
 
         $exists = $args['exists'] ?? false;
-        $sth = $this->db->prepare($sql);
+        $sth = $db->prepare($sql);
         $sth->execute([$context->currentData()]);
         $row = $sth->fetch(PDO::FETCH_NUM);
 

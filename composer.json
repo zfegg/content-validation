@@ -1,6 +1,6 @@
 {
     "name": "zfegg/content-validation",
-    "description": "Content validation for PSR-15 middleware or laminas-mvc",
+    "description": "Content validation for PSR-15 middleware",
     "keywords": [
         "validation",
         "middleware",
