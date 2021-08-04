@@ -5,8 +5,7 @@
     "name": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 64,
-      "pattern": "^[a-zA-Z0-9\\-]+(\\s[a-zA-Z0-9\\-]+)*$"
+      "maxLength": 64
     },
     "age": {
       "type": "integer",

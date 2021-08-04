@@ -6,14 +6,13 @@ namespace ZfeggTest\ContentValidation;
 
 use Laminas\ServiceManager\ServiceManager;
 use Opis\JsonSchema\Validator;
-use Psr\Container\ContainerInterface;
 use Zfegg\ContentValidation\ConfigProvider;
 use Zfegg\ContentValidation\ContentValidationMiddleware;
 
 trait SetupTrait
 {
 
-    private ContainerInterface $container;
+    private ServiceManager $container;
 
     public function setUp(): void
     {

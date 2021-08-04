@@ -8,30 +8,38 @@ use Doctrine\ORM\EntityManagerInterface;
 use Opis\JsonSchema\Filter;
 use Opis\JsonSchema\Schema;
 use Opis\JsonSchema\ValidationContext;
+use Psr\Container\ContainerInterface;
 
 class DoctrineRecordExistsFilter implements Filter
 {
+    private ContainerInterface $container;
+    private string $defaultId;
 
-    private EntityManagerInterface $em;
-
-    public function __construct(EntityManagerInterface $em)
+    public function __construct(ContainerInterface $container, string $defaultId = EntityManagerInterface::class)
     {
-        $this->em = $em;
+        $this->container = $container;
+        $this->defaultId = $defaultId;
     }
 
     public function validate(ValidationContext $context, Schema $schema, array $args = []): bool
     {
-        $criteria = $args['criteria'] ?? [];
-        $exists = $args['exists'] ?? false;
+        /** @var EntityManagerInterface $em */
+        $em = $this->container->get($args['db'] ?? $this->defaultId);
 
-        if (isset($args['field'])) {
-            $rs = $this->em->getRepository($args['entity'])->findOneBy(
-                [$args['field'] => $context->currentData()] + $criteria
-            );
+        if (isset($args['dql'])) {
+            $dql = $args['dql'];
+        } elseif (isset($args['entity'])) {
+            $field = isset($args['field']) ? 'o.' . $args['field'] : 'o';
+            $dql = sprintf('SELECT COUNT(o) FROM %s o WHERE %s=?1', $args['entity'], $field);
         } else {
-            $rs = $this->em->find($args['entity'], $context->currentData());
+            throw new \InvalidArgumentException('Invalid args.');
         }
 
-        return ((bool) $rs) == $exists;
+        $exists = $args['exists'] ?? false;
+        $query = $em->createQuery($dql);
+        $query->setParameter(1, $context->currentData());
+        $row = $query->getSingleScalarResult();
+
+        return $row == $exists;
     }
 }

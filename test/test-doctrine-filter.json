@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "key": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "$filters": [
+        {
+          "$func": "orm-exists",
+          "$vars": {
+            "entity": "ZfeggTest\\ContentValidation\\Entity\\Foo",
+            "field": "key",
+            "exists": true
+          }
+        }
+      ]
+    }
+  },
+  "required": ["key"],
+  "additionalProperties": false
+}
