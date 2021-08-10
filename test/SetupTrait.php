@@ -5,9 +5,9 @@ declare(strict_types = 1);
 namespace ZfeggTest\ContentValidation;
 
 use Laminas\ServiceManager\ServiceManager;
+use Laminas\Stdlib\ArrayUtils;
 use Opis\JsonSchema\Resolvers\FilterResolver;
 use Opis\JsonSchema\Validator;
-use Zfegg\ContentValidation\ConfigProvider;
 use Zfegg\ContentValidation\ContentValidationMiddleware;
 
 trait SetupTrait
@@ -17,13 +17,8 @@ trait SetupTrait
 
     public function setUp(): void
     {
-        $config = (new ConfigProvider())();
-        $container = new ServiceManager($config['dependencies']);
-        $container->setService('fooFilter', fn() => true);
-        $container->setService('barFilter', fn() => true);
-        $container->setService(
-            'config',
-            new \ArrayObject([
+        $config = new \ArrayObject(ArrayUtils::merge(
+            [
                 'zfegg' => [ContentValidationMiddleware::class => ['transform_object_to_array' => true]],
                 Validator::class => [
                     'resolvers' => [
@@ -39,8 +34,16 @@ trait SetupTrait
                         'fooNs' => new FilterResolver()
                     ]
                 ]
-            ])
-        );
+            ],
+            ArrayUtils::merge(
+                (new \Zfegg\ContentValidation\ConfigProvider())(),
+                (new \Laminas\Filter\ConfigProvider())()
+            )
+        ));
+        $container = new ServiceManager($config['dependencies']);
+        $container->setService('fooFilter', fn() => true);
+        $container->setService('barFilter', fn() => true);
+        $container->setService('config', $config);
 
         $this->container = $container;
     }

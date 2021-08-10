@@ -16,6 +16,7 @@ class ConfigProvider
                 'factories' => [
                     ContentValidationMiddleware::class => ContentValidationMiddlewareFactory::class,
                     Validator::class => Factory\ValidatorFactory::class,
+                    Opis\Resolver\TransformerResolver::class => Factory\TransformerResolverFactory::class,
                 ]
             ]
         ];

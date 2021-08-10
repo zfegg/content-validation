@@ -9,6 +9,8 @@ use Psr\Container\ContainerInterface;
 use Zfegg\ContentValidation\Opis\Filter\DoctrineRecordExistsFilter;
 use Zfegg\ContentValidation\Opis\Filter\RecordExistsFilter;
 use Zfegg\ContentValidation\Opis\RemoveAdditionalPropertiesParser;
+use Zfegg\ContentValidation\Opis\Resolver\TransformerResolver;
+use Zfegg\ContentValidation\Opis\TransformersParser;
 use Zfegg\ContentValidation\Opis\TypeCastParser;
 
 class ValidatorFactory
@@ -23,7 +25,9 @@ class ValidatorFactory
         foreach ($parser->supportedDrafts() as $draft) {
             $parser->draft($draft)
                 ->prependKeyword(new TypeCastParser())
-                ->prependKeyword(new RemoveAdditionalPropertiesParser());
+                ->prependKeyword(new RemoveAdditionalPropertiesParser())
+                ->appendKeyword(new TransformersParser($container->get(TransformerResolver::class)))
+            ;
         }
 
         if (isset($config['resolvers'])) {

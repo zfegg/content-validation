@@ -8,6 +8,7 @@ use Opis\JsonSchema\Info\SchemaInfo;
 use Opis\JsonSchema\Keyword;
 use Opis\JsonSchema\Parsers\KeywordParser;
 use Opis\JsonSchema\Parsers\SchemaParser;
+use Zfegg\ContentValidation\Opis\Keyword\TypeCast;
 
 class TypeCastParser extends KeywordParser
 {
