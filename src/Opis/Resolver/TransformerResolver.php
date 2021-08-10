@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace Zfegg\ContentValidation\Opis\Resolver;
 
-
 use Zfegg\ContentValidation\Opis\Helper;
 
 /**

@@ -14,7 +14,7 @@ class TransformersParserTest extends TestCase
 
     use SetupTrait;
 
-    public function json()
+    public function json(): array
     {
         return [
             ['123'],
