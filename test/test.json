@@ -5,7 +5,28 @@
     "name": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 64
+      "maxLength": 64,
+      "$transformers": [
+        "laminas::StripTags",
+        {
+          "$func": "strtolower"
+        },
+        "strtoupper"
+      ]
+    },
+    "transformer-string": {
+      "type": "string",
+      "$transformers": "strtoupper"
+    },
+    "transformer-array": {
+      "type": "string",
+      "$transformers": ["strtoupper"]
+    },
+    "transformer-object": {
+      "type": "string",
+      "$transformers": {
+        "$func": "strtoupper"
+      }
     },
     "age": {
       "type": "integer",
@@ -28,6 +49,15 @@
         }
       },
       "required": ["foo", "bar"]
+    },
+    "list": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "integer"
+        }
+      }
     }
   },
   "required": ["name", "age"],

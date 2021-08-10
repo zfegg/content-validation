@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Zfegg\ContentValidation\Opis;
+namespace Zfegg\ContentValidation\Opis\Keyword;
 
 use Opis\JsonSchema\Errors\ValidationError;
 use Opis\JsonSchema\Keyword;

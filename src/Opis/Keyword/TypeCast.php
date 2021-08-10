@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Zfegg\ContentValidation\Opis;
+namespace Zfegg\ContentValidation\Opis\Keyword;
 
 use Opis\JsonSchema\Errors\ValidationError;
 use Opis\JsonSchema\Keyword;
@@ -11,6 +11,8 @@ use Opis\JsonSchema\ValidationContext;
 
 class TypeCast implements Keyword
 {
+    use SetValueTrait;
+
     private string $type;
 
     public function __construct(string $type)
@@ -23,23 +25,7 @@ class TypeCast implements Keyword
      */
     public function validate(ValidationContext $context, Schema $schema): ?ValidationError
     {
-        $path = $context->currentDataPath();
-        $data = $context->rootData();
-
-        $target = $data;
-        foreach ($path as $key) {
-            if (is_object($target)) {
-                $target = &$target->{$key};
-            } else {
-                $target = &$target[$key];
-            }
-        }
-
-        $context->popDataPath();
-
-        $target = $this->castValue($target);
-
-        $context->pushDataPath($key);
+        $this->setValue($context, [$this, 'castValue']);
 
         return null;
     }
