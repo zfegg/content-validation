@@ -15,16 +15,21 @@ class TransformersParser extends KeywordParser
 {
     use VariablesTrait;
     private Resolver\ResolverInterface $resolver;
+    private string $type;
 
-    public function __construct(Resolver\ResolverInterface $resolver)
-    {
-        parent::__construct('$transformers');
+    public function __construct(
+        Resolver\ResolverInterface $resolver,
+        string $keyword = '$transformers',
+        string $type = self::TYPE_BEFORE
+    ) {
+        parent::__construct($keyword);
         $this->resolver = $resolver;
+        $this->type = $type;
     }
 
     public function type(): string
     {
-        return self::TYPE_BEFORE;
+        return $this->type;
     }
 
     public function parse(SchemaInfo $info, SchemaParser $parser, object $shared): ?Keyword
