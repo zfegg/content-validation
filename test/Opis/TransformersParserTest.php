@@ -63,6 +63,13 @@ JSON
 }
 JSON;
         $data = json_decode($data);
+
+        if (strpos(PHP_VERSION, '7.4.') === 0) {
+            $schema = '{"0": true}';
+        } else {
+            $schema = '{"binary": true}';
+        }
+
         $result = $validator->validate(
             $data,
             <<<JSON
@@ -73,9 +80,7 @@ JSON;
       "type": "string",
       "\$transformers": {
         "\$func": "md5",
-        "\$vars": {
-          "binary": true
-        }
+        "\$vars": $schema
       }
     }
   }
