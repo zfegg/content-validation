@@ -14,6 +14,7 @@ use Zfegg\ContentValidation\Opis\Keyword\TransformerKeyword;
 class TransformersParser extends KeywordParser
 {
     use VariablesTrait;
+
     private Resolver\ResolverInterface $resolver;
     private string $type;
 

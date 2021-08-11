@@ -124,11 +124,19 @@ class ContentValidationMiddleware implements MiddlewareInterface
         ], 422);
     }
 
-    private static function object2Array(object $data): array
+    /**
+     * @param object|array $data
+     * @return mixed
+     */
+    private static function object2Array($data)
     {
-        $data = (array) $data;
-        foreach ($data as $key => $value) {
-            if (is_object($value)) {
+        if (is_object($data)) {
+            $data = (array) $data;
+            foreach ($data as $key => $value) {
+                $data[$key] = self::object2Array($value);
+            }
+        } elseif (is_array($data)) {
+            foreach ($data as $key => $value) {
                 $data[$key] = self::object2Array($value);
             }
         }
