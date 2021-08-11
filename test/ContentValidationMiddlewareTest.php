@@ -72,7 +72,7 @@ class ContentValidationMiddlewareTest extends TestCase
                     [],
                     [],
                     [],
-                    ['name' => 'foo', 'age' => '18', 'sub' => ['foo' => '123']]
+                    ['name' => 'foo', 'age' => '18', 'sub' => ['foo' => '123'], 'list-obj' => [[['id' => 1]]]]
                 ),
             ],
             'HttpPostInvalid' => [
