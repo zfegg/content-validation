@@ -36,66 +36,21 @@ class TypeCast implements Keyword
      */
     private function castValue($value)
     {
+        if ($value !== null && ! is_scalar($value)) {
+            return $value;
+        }
+
         switch ($this->type) {
             case 'integer':
-                return $this->toInteger($value);
+                return intval($value);
             case 'number':
-                return $this->toNumber($value);
+                return floatval($value);
             case 'string':
-                return $this->toString($value);
+                return (string) $value;
             case 'boolean':
-                return $this->toBoolean($value);
+                return (bool) filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+            default:
+                return $value;
         }
-
-        return $value;
-    }
-
-
-    /**
-     * @param mixed $value
-     */
-    private function toInteger($value): ?int
-    {
-        if ($value === null) {
-            return 0;
-        }
-
-        return is_scalar($value) ? intval($value) : null;
-    }
-
-    /**
-     * @param mixed $value
-     */
-    private function toNumber($value): ?float
-    {
-        if ($value === null) {
-            return 0.0;
-        }
-
-        return is_scalar($value) ? floatval($value) : null;
-    }
-
-    /**
-     * @param mixed $value
-     */
-    private function toString($value): ?string
-    {
-        if ($value === null) {
-            return '';
-        }
-
-        if (is_scalar($value)) {
-            return (string) $value;
-        }
-
-        return null;
-    }
-
-    /**
-     * @param mixed $value
-     */
-    private function toBoolean($value): bool
-    {
-        return (bool) filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
     }
 }
