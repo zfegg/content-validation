@@ -7,6 +7,7 @@ namespace Zfegg\ContentValidation;
 use Laminas\Diactoros\Response\JsonResponse;
 use Opis\JsonSchema\Errors\ErrorFormatter;
 use Opis\JsonSchema\Errors\ValidationError;
+use Opis\JsonSchema\Helper;
 use Opis\JsonSchema\ValidationResult;
 use Opis\JsonSchema\Validator;
 use Psr\Http\Message\ResponseInterface;
@@ -82,7 +83,7 @@ class ContentValidationMiddleware implements MiddlewareInterface
             return $handler->handle($request);
         }
 
-        $data = json_decode(json_encode($data));
+        $data = Helper::toJSON($data);
         $result = $this->validator->validate($data, $schema);
 
         if (! $result->isValid()) {
@@ -130,12 +131,8 @@ class ContentValidationMiddleware implements MiddlewareInterface
      */
     private static function object2Array($data)
     {
-        if (is_object($data)) {
+        if (is_object($data) || is_array($data)) {
             $data = (array) $data;
-            foreach ($data as $key => $value) {
-                $data[$key] = self::object2Array($value);
-            }
-        } elseif (is_array($data)) {
             foreach ($data as $key => $value) {
                 $data[$key] = self::object2Array($value);
             }

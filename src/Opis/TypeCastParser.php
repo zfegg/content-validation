@@ -32,7 +32,7 @@ class TypeCastParser extends KeywordParser
 
         $type = $this->keywordValue($schema);
 
-        if (! is_string($type) || $type === 'object') {
+        if (! is_string($type) || $type === 'object' || $type === 'array') {
             return null;
         }
 
