@@ -149,6 +149,24 @@ class ContentValidationMiddlewareTest extends TestCase
             'required' => ['age']
         ];
         $route = $this->createMock(Route::class);
+        $route->method('getOptions')->willReturn(['schema' => $schema]);
+        $this->routeTest([
+            RouteResult::class => RouteResult::fromRoute($route)
+        ]);
+    }
+
+    public function testMezzioOptionsWithMethod(): void
+    {
+        $schema = (object) [
+            'type' => 'object',
+            'properties' => (object) [
+                'age' => (object) [
+                    'type' => 'integer'
+                ]
+            ],
+            'required' => ['age']
+        ];
+        $route = $this->createMock(Route::class);
         $route->method('getOptions')->willReturn(['schema:POST' => $schema]);
         $this->routeTest([
             RouteResult::class => RouteResult::fromRoute($route)
