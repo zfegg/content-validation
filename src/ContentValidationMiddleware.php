@@ -43,9 +43,8 @@ class ContentValidationMiddleware implements MiddlewareInterface
     private function getSchema(ServerRequestInterface $request)
     {
         $withMethod = $this->routeNameWithMethod ? ":{$request->getMethod()}" : '';
-        if (($schema = $request->getAttribute(self::SCHEMA)) ||
-            ($schema = $request->getAttribute(self::SCHEMA . $withMethod))
-        ) {
+        $schema = $request->getAttribute(self::SCHEMA . $withMethod, $request->getAttribute(self::SCHEMA));
+        if ($schema) {
             return $schema;
         }
 
@@ -53,12 +52,12 @@ class ContentValidationMiddleware implements MiddlewareInterface
         if ($route = $request->getAttribute('Mezzio\Router\RouteResult')) {
             /** @var \Mezzio\Router\RouteResult $route */
             $options = $route->getMatchedRoute()->getOptions();
-            return $options[self::SCHEMA . $withMethod] ?? null;
+            return $options[self::SCHEMA . $withMethod] ?? $options[self::SCHEMA] ?? null;
         } elseif ($route = $request->getAttribute('route')) {
             /** @var \Slim\Routing\Route $route */
             return $route->getArgument(
                 self::SCHEMA . $withMethod,
-                $route->getArgument(self::SCHEMA . $withMethod)
+                $route->getArgument(self::SCHEMA)
             );
         }
 
