@@ -6,6 +6,7 @@ namespace Zfegg\ContentValidation\Factory;
 
 use Opis\JsonSchema\Validator;
 use Psr\Container\ContainerInterface;
+use Zfegg\ContentValidation\Opis\Filter\DbalRecordExistsFilter;
 use Zfegg\ContentValidation\Opis\Filter\DoctrineRecordExistsFilter;
 use Zfegg\ContentValidation\Opis\Filter\RecordExistsFilter;
 use Zfegg\ContentValidation\Opis\RemoveAdditionalPropertiesParser;
@@ -63,6 +64,11 @@ class ValidatorFactory
         $parser->getFilterResolver()->registerMultipleTypes(
             'orm-exists',
             new DoctrineRecordExistsFilter($container),
+            $types
+        );
+        $parser->getFilterResolver()->registerMultipleTypes(
+            'dbal-exists',
+            new DbalRecordExistsFilter($container),
             $types
         );
 
