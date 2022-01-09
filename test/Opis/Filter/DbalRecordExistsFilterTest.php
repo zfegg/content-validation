@@ -64,7 +64,7 @@ SQL;
 {"key": "exists"}
 JSON;
         $data = json_decode($data);
-        $result = $validator->validate($data, 'test:test/test-db-filter.json');
+        $result = $validator->validate($data, 'test:test/test-dbal-filter.json');
 
         $this->assertTrue($result->isValid());
     }
