@@ -24,6 +24,42 @@ composer require zfegg/content-validation
 Usage / 使用
 --------------
 
+### `Opis\JsonSchema\Validator` factory config.
+
+```php
+// config.php
+return [
+    Opis\JsonSchema\Validator::class => [
+        'resolvers' => [
+            'protocolDir' => [
+                // foo-schema://host/foo.create.json => schema/dir/foo.create.json
+                ['foo-schema', 'host',  'schema/dir'],
+            ],
+            'protocol' => [
+            ],
+            'prefix' => [
+               ['prefix1', 'path/to/dir'],
+               ['prefix2', 'path/to/dir'],
+            ],
+            'file' => [
+               ['SchemaFoo', 'path/to/file'],
+               ['SchemaBar', 'path/to/file2'],
+            ],
+            'raw' => [
+               ['{"type":"object", ...}', 'schema id 1'],
+               ['{"type":"object", ...}', 'schema id 2'],
+            ]
+        ],
+        'filters' => [
+            'foo-filter' => ['filter' => 'FilterFilterName', 'types' => ['integer']],
+        ],
+        'filtersNS' => [
+            'foo-ns' => 'FilterResolverName',
+        ],
+    ]
+]
+```
+
 ### Mezzio
 
 Add `ConfigProvider` in 'config.php'. / 在 `config.php` 中添加 `ConfigProvider`.

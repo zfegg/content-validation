@@ -12,7 +12,7 @@ jobs:
       fail-fast: false
       matrix:
         operating-system: [ubuntu-latest]
-        php-versions: ['7.4', '8.0']
+        php-versions: ['7.4', '8.0', '8.1']
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -30,8 +30,8 @@ jobs:
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           # Use composer.json for key, if composer.lock is not committed.
-          # key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
+#          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
       - name: Install Composer dependencies
@@ -49,6 +49,6 @@ jobs:
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          composer require php-coveralls/php-coveralls --dev -q
+          composer require php-coveralls/php-coveralls "psr/log:^2" --dev -q
           ./vendor/bin/phpunit --coverage-clover build/logs/clover.xml
           ./vendor/bin/php-coveralls -v

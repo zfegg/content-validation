@@ -7,10 +7,9 @@ namespace Zfegg\ContentValidation\Opis\Filter;
 use Opis\JsonSchema\Filter;
 use Opis\JsonSchema\Schema;
 use Opis\JsonSchema\ValidationContext;
-use PDO;
 use Psr\Container\ContainerInterface;
 
-class RecordExistsFilter implements Filter
+class DbalRecordExistsFilter implements Filter
 {
 
     private ContainerInterface $container;
@@ -24,7 +23,7 @@ class RecordExistsFilter implements Filter
 
     public function validate(ValidationContext $context, Schema $schema, array $args = []): bool
     {
-        /** @var \PDO $db */
+        /** @var \Doctrine\DBAL\Connection $db */
         $db = $this->container->get($args['db'] ?? $this->defaultId);
 
         if (isset($args['sql'])) {
@@ -37,8 +36,7 @@ class RecordExistsFilter implements Filter
 
         $exists = $args['exists'] ?? false;
         $sth = $db->prepare($sql);
-        $sth->execute([$context->currentData()]);
-        $row = $sth->fetch(PDO::FETCH_NUM);
+        $row = $sth->executeQuery([$context->currentData()])->fetchNumeric();
 
         return $row[0] == $exists;
     }

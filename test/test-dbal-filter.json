@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "properties": {
+    "key": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "$filters": [
+        {
+          "$func": "dbal-exists",
+          "$vars": {
+            "db": "dbal",
+            "table": "foo",
+            "field": "key",
+            "exists": true
+          }
+        }
+      ]
+    }
+  },
+  "required": ["key"],
+  "additionalProperties": false
+}
