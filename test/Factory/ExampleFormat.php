@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace ZfeggTest\ContentValidation\Factory;
 
 use Opis\JsonSchema\Format;
