@@ -55,6 +55,20 @@ class ValidatorFactory
             }
         }
 
+        if (isset($config['formats'])) {
+            $formatResolver = $parser->getFormatResolver();
+
+            foreach ($config['formats'] as $type => $formats) {
+                foreach ($formats as $name => $callable) {
+                    if (is_callable($callable)) {
+                        $formatResolver->registerCallable($type, $name, $callable);
+                    } elseif (is_string($callable) && $container->has($callable)) {
+                        $formatResolver->register($type, $name, $container->get($callable));
+                    }
+                }
+            }
+        }
+
         $types = ['string', 'integer', 'number'];
         $parser->getFilterResolver()->registerMultipleTypes(
             'db-exists',
