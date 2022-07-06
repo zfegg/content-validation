@@ -50,6 +50,14 @@
       },
       "required": ["foo", "bar"]
     },
+    "format-url": {
+      "type": "string",
+      "format": "url"
+    },
+    "format-example": {
+      "type": "string",
+      "format": "example"
+    },
     "list": {
       "type": "array",
       "items": {

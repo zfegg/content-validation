@@ -12,6 +12,11 @@ class ValidatorFactoryTest extends TestCase
 {
     use SetupTrait;
 
+    public static function isUrl(string $value): bool
+    {
+        return filter_var($value, FILTER_VALIDATE_URL) !== false;
+    }
+
     public function testFactory(): void
     {
         $validator = $this->container->get(Validator::class);
@@ -27,6 +32,8 @@ class ValidatorFactoryTest extends TestCase
     "sub" : {
       "foo": "123"
     },
+    "format-url":"http://localhost",
+    "format-example":"sdfsdf",
     "list": [["1a"]]
 }
 JSON;
