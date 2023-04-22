@@ -26,6 +26,7 @@
         "laminas/laminas-eventmanager": "^3.0",
         "laminas/laminas-filter": "^2.11",
         "laminas/laminas-servicemanager": "^3.7",
+        "laminas/laminas-validator": "^2.28",
         "mezzio/mezzio-router": "^3.0",
         "phpspec/prophecy-phpunit": "^2.0",
         "phpunit/phpunit": "9.5.16",
