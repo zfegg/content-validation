@@ -136,6 +136,6 @@ $app->post(
 验证器
 --------
 
-- `DbalRecordExistsFilter`: 使用 `doctrine/dbal` 验证DB记录是否存在
-- `DoctrineRecordExistsFilter`: 使用 `doctrine/orm` 验证DB记录是否存在
-- `RecordExistsFilter`: 使用 `PDO` 验证DB记录是否存在
+- [`DbalRecordExistsFilter`](src/Opis/Filter/DbalRecordExistsFilter.php): 使用 `doctrine/dbal` 验证DB记录是否存在
+- [`DoctrineRecordExistsFilter`](src/Opis/Filter/DoctrineRecordExistsFilter.php): 使用 `doctrine/orm` 验证DB记录是否存在
+- [`RecordExistsFilter`](src/Opis/Filter/RecordExistsFilter.php): 使用 `PDO` 验证DB记录是否存在

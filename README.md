@@ -138,6 +138,6 @@ $app->post(
 Validators
 ----------
 
-- `DbalRecordExistsFilter`: Use `doctrine/dbal` to check record exists.
-- `DoctrineRecordExistsFilter`: Use `doctrine/orm` to check record exists.
-- `RecordExistsFilter`: Use `PDO` to check record exists.
+- [`DbalRecordExistsFilter`](src/Opis/Filter/DbalRecordExistsFilter.php) : Use `doctrine/dbal` to check record exists.
+- [`DoctrineRecordExistsFilter`](src/Opis/Filter/DoctrineRecordExistsFilter.php) : Use `doctrine/orm` to check record exists.
+- [`RecordExistsFilter`](src/Opis/Filter/RecordExistsFilter.php) : Use `PDO` to check record exists.
