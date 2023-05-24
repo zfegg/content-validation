@@ -136,6 +136,45 @@ $app->post(
 验证器
 --------
 
-- [`DbalRecordExistsFilter`](src/Opis/Filter/DbalRecordExistsFilter.php): 使用 `doctrine/dbal` 验证DB记录是否存在
-- [`DoctrineRecordExistsFilter`](src/Opis/Filter/DoctrineRecordExistsFilter.php): 使用 `doctrine/orm` 验证DB记录是否存在
-- [`RecordExistsFilter`](src/Opis/Filter/RecordExistsFilter.php): 使用 `PDO` 验证DB记录是否存在
+- [`DbalRecordExistsFilter`](src/Opis/Filter/DbalRecordExistsFilter.php): 使用 `doctrine/dbal` 验证DB记录是否存在.  
+   json-schema `$filters`配置:
+  ```json5
+  {
+      "$func": "dbal-exists",
+      "$vars": {
+        "db": "db",          // Get DBAL object by container.
+        "sql": "select ...", // Set custom SQL
+        "table": "foo",      // Table name
+        "field": "key",      // Field name
+        "exists": true       // Check record exists or not exists. 
+      }
+  }
+  ```
+- [`DoctrineRecordExistsFilter`](src/Opis/Filter/DoctrineRecordExistsFilter.php): 使用 `doctrine/orm` 验证DB记录是否存在。  
+  json-schema `$filters`配置:
+  ```json5
+  {
+      "$func": "orm-exists",
+      "$vars": {
+        "db": "orm.default",   // Get ORM object by container.
+        "dql": "select ...",   // Set custom DQL
+        "entity": "Foo",       // Entity name
+        "field": "key",        // Field name
+        "exists": true         // Check record exists or not exists. 
+      }
+  }
+  ```
+- [`RecordExistsFilter`](src/Opis/Filter/RecordExistsFilter.php): 使用 `PDO` 验证DB记录是否存在。  
+  json-schema `$filters`配置:
+  ```json5
+  {
+      "$func": "db-exists",
+      "$vars": {
+        "db": "db",          // Get DBAL object by container.
+        "sql": "select ...", // Set custom SQL
+        "table": "foo",      // Table name
+        "field": "key",      // Field name
+        "exists": true       // Check record exists or not exists. 
+      }
+  }
+  ```
