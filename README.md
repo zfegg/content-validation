@@ -148,7 +148,7 @@ Validators
         "sql": "select ...", // Set custom SQL
         "table": "foo",      // Table name
         "field": "key",      // Field name
-        "exists": true       // Check record exists or not exists. 
+        "exists": true       // Check record exists or not exists. Default: false
       }
   }
   ```
@@ -162,7 +162,7 @@ Validators
         "dql": "select ...",   // Set custom DQL
         "entity": "Foo",       // Entity name
         "field": "key",        // Field name
-        "exists": true         // Check record exists or not exists. 
+        "exists": true         // Check record exists or not exists. Default: false
       }
   }
   ```
@@ -176,7 +176,7 @@ Validators
         "sql": "select ...", // Set custom SQL
         "table": "foo",      // Table name
         "field": "key",      // Field name
-        "exists": true       // Check record exists or not exists. 
+        "exists": true       // Check record exists or not exists. Default: false
       }
   }
   ```

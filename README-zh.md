@@ -142,11 +142,11 @@ $app->post(
   {
       "$func": "dbal-exists",
       "$vars": {
-        "db": "db",          // Get DBAL object by container.
-        "sql": "select ...", // Set custom SQL
-        "table": "foo",      // Table name
-        "field": "key",      // Field name
-        "exists": true       // Check record exists or not exists. 
+        "db": "db",          // IoC容器中的 DBAL 对象.
+        "sql": "select ...", // 自定义 SQL
+        "table": "foo",      // 表名称
+        "field": "key",      // 字段名称
+        "exists": true       // 检查记录存在或不存在. 默认: false
       }
   }
   ```
@@ -156,11 +156,11 @@ $app->post(
   {
       "$func": "orm-exists",
       "$vars": {
-        "db": "orm.default",   // Get ORM object by container.
-        "dql": "select ...",   // Set custom DQL
-        "entity": "Foo",       // Entity name
-        "field": "key",        // Field name
-        "exists": true         // Check record exists or not exists. 
+        "db": "orm.default",   // IoC容器中的 ORM 对象.
+        "dql": "select ...",   // 自定义 DQL
+        "entity": "Foo",       // 实体名称
+        "field": "key",        // 字段名称
+        "exists": true         // 检查记录存在或不存在. 默认: false
       }
   }
   ```
@@ -170,11 +170,11 @@ $app->post(
   {
       "$func": "db-exists",
       "$vars": {
-        "db": "db",          // Get DBAL object by container.
-        "sql": "select ...", // Set custom SQL
-        "table": "foo",      // Table name
-        "field": "key",      // Field name
-        "exists": true       // Check record exists or not exists. 
+        "db": "db",          // IoC容器中的 PDO 对象.
+        "sql": "select ...", // 自定义 SQL
+        "table": "foo",      // 表名称
+        "field": "key",      // 字段名称
+        "exists": true       // 检查记录存在或不存在. 默认: false
       }
   }
   ```
