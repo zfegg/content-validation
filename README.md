@@ -138,6 +138,45 @@ $app->post(
 Validators
 ----------
 
-- [`DbalRecordExistsFilter`](src/Opis/Filter/DbalRecordExistsFilter.php) : Use `doctrine/dbal` to check record exists.
-- [`DoctrineRecordExistsFilter`](src/Opis/Filter/DoctrineRecordExistsFilter.php) : Use `doctrine/orm` to check record exists.
-- [`RecordExistsFilter`](src/Opis/Filter/RecordExistsFilter.php) : Use `PDO` to check record exists.
+- [`DbalRecordExistsFilter`](src/Opis/Filter/DbalRecordExistsFilter.php): Use `doctrine/dbal` to check record exists.
+  The json-schema `$filters` config:
+  ```json5
+  {
+      "$func": "dbal-exists",
+      "$vars": {
+        "db": "db",          // Get DBAL object by container.
+        "sql": "select ...", // Set custom SQL
+        "table": "foo",      // Table name
+        "field": "key",      // Field name
+        "exists": true       // Check record exists or not exists. Default: false
+      }
+  }
+  ```
+- [`DoctrineRecordExistsFilter`](src/Opis/Filter/DoctrineRecordExistsFilter.php): Use `doctrine/orm` to check record exists.
+  The json-schema `$filters` config:
+  ```json5
+  {
+      "$func": "orm-exists",
+      "$vars": {
+        "db": "orm.default",   // Get ORM object by container.
+        "dql": "select ...",   // Set custom DQL
+        "entity": "Foo",       // Entity name
+        "field": "key",        // Field name
+        "exists": true         // Check record exists or not exists. Default: false
+      }
+  }
+  ```
+- [`RecordExistsFilter`](src/Opis/Filter/RecordExistsFilter.php): Use `PDO` to check record exists.
+  The json-schema `$filters` config:
+  ```json5
+  {
+      "$func": "db-exists",
+      "$vars": {
+        "db": "db",          // Get DBAL object by container.
+        "sql": "select ...", // Set custom SQL
+        "table": "foo",      // Table name
+        "field": "key",      // Field name
+        "exists": true       // Check record exists or not exists. Default: false
+      }
+  }
+  ```
