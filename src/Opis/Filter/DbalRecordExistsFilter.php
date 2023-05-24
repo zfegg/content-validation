@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Zfegg\ContentValidation\Opis\Filter;
 
+use Opis\JsonSchema\Errors\CustomError;
 use Opis\JsonSchema\Filter;
 use Opis\JsonSchema\Schema;
 use Opis\JsonSchema\ValidationContext;
@@ -38,6 +39,14 @@ class DbalRecordExistsFilter implements Filter
         $sth = $db->prepare($sql);
         $row = $sth->executeQuery([$context->currentData()])->fetchNumeric();
 
-        return $row[0] == $exists;
+        if ($row[0] == $exists) {
+            return true;
+        }
+
+        if (empty($args["message"])) {
+            return false;
+        }
+
+        throw new CustomError($args["message"], $args);
     }
 }

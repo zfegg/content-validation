@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Zfegg\ContentValidation\Opis\Filter;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Opis\JsonSchema\Errors\CustomError;
 use Opis\JsonSchema\Filter;
 use Opis\JsonSchema\Schema;
 use Opis\JsonSchema\ValidationContext;
@@ -40,6 +41,14 @@ class DoctrineRecordExistsFilter implements Filter
         $query->setParameter(1, $context->currentData());
         $row = $query->getSingleScalarResult();
 
-        return $row == $exists;
+        if ($row == $exists) {
+            return true;
+        }
+
+        if (empty($args["message"])) {
+            return false;
+        }
+
+        throw new CustomError($args["message"], $args);
     }
 }
