@@ -21,7 +21,7 @@
         "ext-pdo": "*",
         "doctrine/annotations": "^1.13",
         "doctrine/cache": "^1.11",
-        "doctrine/orm": "^2.9",
+        "doctrine/orm": "^2.9 || ^3.0",
         "laminas/laminas-diactoros": "^2.5",
         "laminas/laminas-eventmanager": "^3.0",
         "laminas/laminas-filter": "^2.11",

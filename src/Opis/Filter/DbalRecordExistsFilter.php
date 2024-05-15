@@ -35,8 +35,7 @@ class DbalRecordExistsFilter implements Filter
         }
 
         $exists = $args['exists'] ?? false;
-        $sth = $db->prepare($sql);
-        $row = $sth->executeQuery([$context->currentData()])->fetchNumeric();
+        $row = $db->executeQuery($sql, [$context->currentData()])->fetchNumeric();
 
         return $row[0] == $exists;
     }
