@@ -42,12 +42,9 @@ class TransformerKeyword implements Keyword
             }
 
             $func = $filter->types[$type];
-
+            $args = [];
             if ($filter->args) {
                 $args = (array)$filter->args->resolve($context->rootData(), $context->currentDataPath());
-                $args += $context->globals();
-            } else {
-                $args = $context->globals();
             }
 
             if ($func instanceof TransformerInterface) {
