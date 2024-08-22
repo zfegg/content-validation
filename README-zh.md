@@ -1,29 +1,28 @@
-PSR-15 Content Validation
+PSR-15 内容验证器
 ===========================
 
-[简体中文](README-zh.md)
-
+[English](README.md)
 
 [![GitHub Actions: Run tests](https://github.com/zfegg/content-validation/workflows/qa/badge.svg)](https://github.com/zfegg/content-validation/actions?query=workflow%3A%22qa%22)
 [![Coverage Status](https://coveralls.io/repos/github/zfegg/content-validation/badge.svg?branch=master)](https://coveralls.io/github/zfegg/content-validation?branch=master)
 [![Latest Stable Version](https://poser.pugx.org/zfegg/content-validation/v/stable.png)](https://packagist.org/packages/zfegg/content-validation)
 
-Content validation for PSR-15 middleware. 
-Based on [`opis/json-schema`](https://packagist.org/packages/opis/json-schema).
+基于 PSR-15 内容验证中间件。
+内容验证使用 [`opis/json-schema`](https://packagist.org/packages/opis/json-schema).
 
-Installation
------------------------
+安装使用
+---------
 
-Install via composer.
+用 composer 安装.
 
 ```bash
 composer require zfegg/content-validation
 ```
 
-Usage
---------------
+使用
+-----
 
-### `Opis\JsonSchema\Validator` factory config.
+### `Opis\JsonSchema\Validator` 工厂配置
 
 ```php
 // config.php
@@ -61,7 +60,7 @@ return [
 
 ### Mezzio
 
-Add `ConfigProvider` in 'config.php'.
+在 `config.php` 中添加 `ConfigProvider`.
 
 ```php
 
@@ -101,7 +100,7 @@ $app->post(
 ;
 ```
 
-Invalid request will response status 422.
+无效请求将响应 422状态码.
 
 ```shell
 curl "http://host/api/users" -d 'username=foo'
@@ -134,49 +133,48 @@ $app->post(
 ;
 ```
 
+验证器
+--------
 
-Validators
-----------
-
-- [`DbalRecordExistsFilter`](src/Opis/Filter/DbalRecordExistsFilter.php): Use `doctrine/dbal` to check record exists.
-  The json-schema `$filters` config:
+- [`DbalRecordExistsFilter`](src/Opis/Filter/DbalRecordExistsFilter.php): 使用 `doctrine/dbal` 验证DB记录是否存在.  
+   json-schema `$filters`配置:
   ```json5
   {
       "$func": "dbal-exists",
       "$vars": {
-        "db": "db",          // Get DBAL object by container.
-        "sql": "select ...", // Set custom SQL
-        "table": "foo",      // Table name
-        "field": "key",      // Field name
-        "exists": true       // Check record exists or not exists. Default: false
+        "db": "db",          // IoC容器中的 DBAL 对象.
+        "sql": "select ...", // 自定义 SQL
+        "table": "foo",      // 表名称
+        "field": "key",      // 字段名称
+        "exists": true       // 检查记录存在或不存在. 默认: false
       }
   }
   ```
-- [`DoctrineRecordExistsFilter`](src/Opis/Filter/DoctrineRecordExistsFilter.php): Use `doctrine/orm` to check record exists.
-  The json-schema `$filters` config:
+- [`DoctrineRecordExistsFilter`](src/Opis/Filter/DoctrineRecordExistsFilter.php): 使用 `doctrine/orm` 验证DB记录是否存在。  
+  json-schema `$filters`配置:
   ```json5
   {
       "$func": "orm-exists",
       "$vars": {
-        "db": "orm.default",   // Get ORM object by container.
-        "dql": "select ...",   // Set custom DQL
-        "entity": "Foo",       // Entity name
-        "field": "key",        // Field name
-        "exists": true         // Check record exists or not exists. Default: false
+        "db": "orm.default",   // IoC容器中的 ORM 对象.
+        "dql": "select ...",   // 自定义 DQL
+        "entity": "Foo",       // 实体名称
+        "field": "key",        // 字段名称
+        "exists": true         // 检查记录存在或不存在. 默认: false
       }
   }
   ```
-- [`RecordExistsFilter`](src/Opis/Filter/RecordExistsFilter.php): Use `PDO` to check record exists.
-  The json-schema `$filters` config:
+- [`RecordExistsFilter`](src/Opis/Filter/RecordExistsFilter.php): 使用 `PDO` 验证DB记录是否存在。  
+  json-schema `$filters`配置:
   ```json5
   {
       "$func": "db-exists",
       "$vars": {
-        "db": "db",          // Get DBAL object by container.
-        "sql": "select ...", // Set custom SQL
-        "table": "foo",      // Table name
-        "field": "key",      // Field name
-        "exists": true       // Check record exists or not exists. Default: false
+        "db": "db",          // IoC容器中的 PDO 对象.
+        "sql": "select ...", // 自定义 SQL
+        "table": "foo",      // 表名称
+        "field": "key",      // 字段名称
+        "exists": true       // 检查记录存在或不存在. 默认: false
       }
   }
   ```
