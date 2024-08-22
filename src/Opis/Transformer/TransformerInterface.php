@@ -13,5 +13,5 @@ interface TransformerInterface
      * @param mixed $data
      * @return mixed
      */
-    public function transform($data, ValidationContext $context, SchemaInfo $info, array $args);
+    public function transform($data, ValidationContext $context, SchemaInfo $info, array $args = []);
 }

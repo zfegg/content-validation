@@ -22,7 +22,7 @@ class LaminasTransformer implements TransformerInterface
     /**
      * @inheritDoc
      */
-    public function transform($data, ValidationContext $context, SchemaInfo $info, array $args)
+    public function transform($data, ValidationContext $context, SchemaInfo $info, array $args = [])
     {
         return $this->filters->get($this->name, $args)->filter($data);
     }
