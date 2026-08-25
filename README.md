@@ -88,10 +88,10 @@ $app->post(
 ->setOptions(['schema' => 'path-to-json-schema.json'])
 //->setOptions([  
 //   // or set json-schema object. 
-//  'schema' => (object) [
+//  'schema' => [
 //        'type' => 'object',
-//        'properties' => (object) [
-//             'age' => (object) [
+//        'properties' => [
+//             'age' => [
 //                 'type' => 'integer'
 //              ]
 //        ],
