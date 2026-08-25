@@ -25,14 +25,13 @@ jobs:
       - name: Get composer cache directory
         id: composer-cache
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
-      - name: Cache composer dependencies
-        uses: actions/cache@v2
+
+      - uses: actions/cache@v5
+        name: Cache composer dependencies
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
-          # Use composer.json for key, if composer.lock is not committed.
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
-#          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}-${{ matrix.php-versions }}
+          restore-keys: ${{ runner.os }}-composer-${{ matrix.php-versions }}
 
       - name: Install Composer dependencies
         run: composer install --no-progress --prefer-dist --optimize-autoloader
