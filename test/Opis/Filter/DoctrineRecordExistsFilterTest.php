@@ -47,6 +47,9 @@ SQL;
         $conf->setMetadataDriverImpl(new AttributeDriver([__DIR__ . "/../../Entity"]));
         $conf->setProxyDir(__DIR__ . '/../../data');
         $conf->setProxyNamespace('DoctrineProxies');
+        if (PHP_VERSION_ID >= 80400) {
+            $conf->enableNativeLazyObjects(true);
+        }
         $em = new EntityManager($db, $conf);
 
         $em->getConnection()->prepare(self::SQL)->executeStatement();
