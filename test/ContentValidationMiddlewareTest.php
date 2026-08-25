@@ -138,6 +138,18 @@ class ContentValidationMiddlewareTest extends TestCase
         }
     }
 
+    private function createEmptyMiddleware(): MiddlewareInterface
+    {
+        return new class implements MiddlewareInterface {
+            public function process(
+                ServerRequestInterface $request,
+                RequestHandlerInterface $handler
+            ): ResponseInterface {
+                return $handler->handle($request);
+            }
+        };
+    }
+
     public function testMezzio(): void
     {
         $schema = [
@@ -149,12 +161,7 @@ class ContentValidationMiddlewareTest extends TestCase
             ],
             'required' => ['age']
         ];
-        $route = new Route('', new class implements MiddlewareInterface {
-            public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
-            {
-                return $handler->handle($request);
-            }
-        });
+        $route = new Route('', $this->createEmptyMiddleware());
         $route->setOptions(['schema' => $schema]);
         $this->routeTest([
             RouteResult::class => RouteResult::fromRoute($route)
@@ -172,12 +179,7 @@ class ContentValidationMiddlewareTest extends TestCase
             ],
             'required' => ['age']
         ];
-        $route = new Route('', new class implements MiddlewareInterface {
-            public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
-            {
-                return $handler->handle($request);
-            }
-        });
+        $route = new Route('', $this->createEmptyMiddleware());
         $route->setOptions(['schema:POST' => $schema]);
         $this->routeTest([
             RouteResult::class => RouteResult::fromRoute($route)

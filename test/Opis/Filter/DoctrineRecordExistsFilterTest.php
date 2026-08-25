@@ -9,7 +9,6 @@ use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\Driver\AttributeDriver;
-use Doctrine\ORM\Tools\Setup;
 use Opis\JsonSchema\Schema;
 use Opis\JsonSchema\SchemaLoader;
 use Opis\JsonSchema\ValidationContext;
