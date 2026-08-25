@@ -11,7 +11,7 @@
         "psr15"
     ],
     "require": {
-        "php": ">=7.4",
+        "php": ">=8.0",
         "psr/http-server-middleware": "^1.0",
         "opis/json-schema": "^2.1",
         "ext-json": "*"
@@ -19,17 +19,16 @@
     "license": "MIT",
     "require-dev": {
         "ext-pdo": "*",
-        "doctrine/annotations": "^1.13",
         "doctrine/cache": "^1.11",
         "doctrine/orm": "^2.9 || ^3.0",
         "laminas/laminas-diactoros": "^2.0 || ^3.3.1",
         "laminas/laminas-eventmanager": "^3.0",
         "laminas/laminas-filter": "^2.11",
         "laminas/laminas-servicemanager": "^3.7 || ^4.0",
-        "laminas/laminas-validator": "^2.0",
-        "mezzio/mezzio-router": "^3.0",
+        "laminas/laminas-validator": ">=2.0",
+        "mezzio/mezzio-router": ">=3.0",
         "phpspec/prophecy-phpunit": "^2.0",
-        "phpunit/phpunit": "9.5.16",
+        "phpunit/phpunit": "^10",
         "slevomat/coding-standard": "^7.0.12",
         "slim/slim": "^4.8.1"
     },

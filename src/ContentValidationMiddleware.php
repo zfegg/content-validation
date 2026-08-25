@@ -83,6 +83,9 @@ class ContentValidationMiddleware implements MiddlewareInterface
         }
 
         $data = Helper::toJSON($data);
+        if (is_array($schema)) {
+            $schema = Helper::toJSON($schema);
+        }
         $result = $this->validator->validate($data, $schema, $request->getAttributes());
 
         if (! $result->isValid()) {

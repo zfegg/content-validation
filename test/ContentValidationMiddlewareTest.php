@@ -11,6 +11,7 @@ use Mezzio\Router\RouteResult;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Zfegg\ContentValidation\ContentValidationMiddleware;
 
@@ -139,17 +140,22 @@ class ContentValidationMiddlewareTest extends TestCase
 
     public function testMezzio(): void
     {
-        $schema = (object) [
+        $schema = [
             'type' => 'object',
-            'properties' => (object) [
-                'age' => (object) [
+            'properties' => [
+                'age' => [
                     'type' => 'integer'
                 ]
             ],
             'required' => ['age']
         ];
-        $route = $this->createMock(Route::class);
-        $route->method('getOptions')->willReturn(['schema' => $schema]);
+        $route = new Route('', new class implements MiddlewareInterface {
+            public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+            {
+                return $handler->handle($request);
+            }
+        });
+        $route->setOptions(['schema' => $schema]);
         $this->routeTest([
             RouteResult::class => RouteResult::fromRoute($route)
         ]);
@@ -166,8 +172,13 @@ class ContentValidationMiddlewareTest extends TestCase
             ],
             'required' => ['age']
         ];
-        $route = $this->createMock(Route::class);
-        $route->method('getOptions')->willReturn(['schema:POST' => $schema]);
+        $route = new Route('', new class implements MiddlewareInterface {
+            public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+            {
+                return $handler->handle($request);
+            }
+        });
+        $route->setOptions(['schema:POST' => $schema]);
         $this->routeTest([
             RouteResult::class => RouteResult::fromRoute($route)
         ]);
