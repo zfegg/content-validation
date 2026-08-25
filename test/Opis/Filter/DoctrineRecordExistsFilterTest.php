@@ -4,9 +4,11 @@ declare(strict_types = 1);
 
 namespace ZfeggTest\ContentValidation\Opis\Filter;
 
+use Doctrine\DBAL\DriverManager;
+use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Tools\Setup;
+use Doctrine\ORM\Mapping\Driver\AttributeDriver;
 use Opis\JsonSchema\Schema;
 use Opis\JsonSchema\SchemaLoader;
 use Opis\JsonSchema\ValidationContext;
@@ -36,8 +38,17 @@ SQL;
     {
         $this->setUpContainer();
         $isDevMode = true;
-        $config = Setup::createAnnotationMetadataConfiguration([__DIR__ . "/../../Entity"], $isDevMode);
-        $em = EntityManager::create(['url' => 'sqlite:///:memory:',], $config);
+        $db = DriverManager::getConnection([
+            'driver' => 'pdo_sqlite',
+            'url' => 'sqlite:///:memory:',
+            'memory' => true,
+        ]);
+        $conf = new Configuration();
+        $conf->setMetadataDriverImpl(new AttributeDriver([__DIR__ . "/../../Entity"]));
+        $conf->setProxyDir(__DIR__ . '/../../data');
+        $conf->setProxyNamespace('DoctrineProxies');
+        $em = new EntityManager($db, $conf);
+
         $em->getConnection()->prepare(self::SQL)->executeStatement();
         $em->getConnection()->prepare('INSERT INTO foo VALUES(NULL, "exists","123")')->executeStatement();
         $this->container->setService(EntityManagerInterface::class, $em);

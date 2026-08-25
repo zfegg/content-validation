@@ -4,6 +4,12 @@ declare(strict_types = 1);
 
 namespace ZfeggTest\ContentValidation\Entity;
 
+use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\Entity;
+use Doctrine\ORM\Mapping\GeneratedValue;
+use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\Table;
+
 /**
  * Foo
  *
@@ -11,6 +17,8 @@ namespace ZfeggTest\ContentValidation\Entity;
  * @Entity
  *
  */
+#[Entity]
+#[Table()]
 class Foo
 {
     /**
@@ -19,18 +27,23 @@ class Foo
      * @Id
      * @GeneratedValue(strategy="IDENTITY")
      */
+    #[GeneratedValue(strategy: "IDENTITY")]
+    #[Id]
+    #[Column(type: 'integer')]
     private int $id;
 
     /**
      *
      * @Column(name="`key`", type="string", length=255)
      */
+    #[Column(type: 'string', length: 255)]
     private string $key;
 
     /**
      * @var mixed
      * @Column(name="value", type="json", length=255)
      */
+    #[Column(type: 'json', length: 255)]
     private $value;
 
     public function getId(): int

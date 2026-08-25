@@ -33,10 +33,15 @@ SQL;
     protected function setUp(): void
     {
         $this->setUpContainer();
-        $db = DriverManager::getConnection(['url' => 'sqlite:///:memory:']);
+        $db = DriverManager::getConnection([
+            'driver' => 'pdo_sqlite',
+            'url' => 'sqlite:///:memory:',
+            'memory' => true,
+        ]);
         $db->executeStatement(self::SQL);
         $db->executeStatement('INSERT INTO foo VALUES(NULL, "exists","123")');
-        $this->container->setService('db', $db->getWrappedConnection());
+        $conn = $db->getNativeConnection();
+        $this->container->setService('db', $conn);
         $this->container->setService('dbal', $db);
     }
 
